@@ -1,0 +1,13 @@
+@layer base {
+  * {
+    @apply !ring-inset;
+  }
+
+  /*
+   * Without this, sr-only elements where causing scroll bars to appear in
+   * some browsers
+   */
+  .sr-only {
+    @apply top-0;
+  }
+}
