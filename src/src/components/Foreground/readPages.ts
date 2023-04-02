@@ -29,7 +29,7 @@ export async function readPages(
 export type Takeout = {
   readonly description: string;
   readonly lastBuildDate: string;
-  readonly books: RA<BaseBook>;
+  readonly books: RA<Book>;
 };
 
 /**
@@ -98,6 +98,7 @@ const selectors = {
   averageRating: 'average_rating',
   publicationYear: 'book_published',
 } as const;
+
 const parseItem = (element: Element): BaseBook =>
   Object.fromEntries(
     Object.entries(selectors).map(([key, selector]) => {

@@ -29,11 +29,62 @@ export const commonText = createDictionary({
   tryAgain: {
     'en-us': 'Try again',
   },
-  takeoutDate: {
-    'en-us': 'Takeout date:',
+  lastUpdated: {
+    'en-us': 'Last updated:',
   },
   books: {
     'en-us': 'Books',
+  },
+  title: {
+    'en-us': 'Title',
+  },
+  id: {
+    'en-us': 'ID',
+  },
+  image: {
+    'en-us': 'Image',
+  },
+  description: {
+    'en-us': 'Description',
+  },
+  pageCount: {
+    'en-us': 'Page count',
+  },
+  authorName: {
+    'en-us': 'Author',
+  },
+  userRating: {
+    'en-us': 'Rating',
+  },
+  dateAdded: {
+    'en-us': 'Date added',
+  },
+  shelves: {
+    'en-us': 'Shelves',
+  },
+  review: {
+    'en-us': 'Review',
+  },
+  averageRating: {
+    'en-us': 'Average rating',
+  },
+  publicationYear: {
+    'en-us': 'Publication year',
+  },
+  publicationDate: {
+    'en-us': 'Publication date',
+  },
+  privateNotes: {
+    'en-us': 'Private notes',
+  },
+  readTimes: {
+    'en-us': 'Read times',
+  },
+  fullDate: {
+    'en-us': 'Full date',
+  },
+  columns: {
+    'en-us': 'Columns',
   },
 });
 /* eslint-enable @typescript-eslint/naming-convention */

@@ -1,13 +1,14 @@
 import React from 'react';
+
 import { commonText } from '../../localization/common';
-import { Book, Takeout } from '../Foreground/readPages';
-import { FilePicker, fileToText } from '../Molecules/FilePicker';
 import { Button, ErrorMessage } from '../Atoms';
+import type { Takeout } from '../Foreground/readPages';
 import { DateElement } from '../Molecules/DateElement';
-import { RA } from '../../utils/types';
+import { FilePicker, fileToText } from '../Molecules/FilePicker';
+import { Books } from './Books';
 
 export function App(): JSX.Element | null {
-  const [data, setData] = React.useState<string | Takeout | undefined>(
+  const [data, setData] = React.useState<Takeout | string | undefined>(
     undefined
   );
   return (
@@ -23,6 +24,7 @@ export function App(): JSX.Element | null {
             onSelected={(file): void =>
               void fileToText(file)
                 .then((text) => JSON.parse(text))
+                .then(setData)
                 .catch((error) => setData(error.message))
             }
           />
@@ -44,16 +46,12 @@ export function App(): JSX.Element | null {
   );
 }
 
-export function Dashboard({
-  takeout,
-}: {
-  readonly takeout: Takeout;
-}): JSX.Element {
+function Dashboard({ takeout }: { readonly takeout: Takeout }): JSX.Element {
   return (
     <>
       <h2>{takeout.description}</h2>
       <p>
-        {commonText('takeoutDate')}
+        {commonText('lastUpdated')}
         <DateElement date={takeout.lastBuildDate} />
       </p>
       <h3>
@@ -63,5 +61,3 @@ export function Dashboard({
     </>
   );
 }
-
-export function Books({ books }: { readonly books: RA<Book> }): JSX.Element {}

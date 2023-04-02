@@ -49,8 +49,15 @@ export const Button = {
   ),
 };
 
+export const Ul = wrap('Ul', 'ul', '', { role: 'list' });
+
 export const Label = {
-  Block: wrap('Label.Block', 'label', 'flex flex-col'),
+  Inline: wrap('Label.Inline', 'label', 'flex flex-col'),
+  Block: wrap(
+    'Label.Block',
+    'label',
+    'cursor-pointer inline-flex gap-1 items-center'
+  ),
 };
 
 export const ErrorMessage = wrap(
