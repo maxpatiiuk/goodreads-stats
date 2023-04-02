@@ -32,15 +32,18 @@ downloadLink.addEventListener('click', () => {
 footer.prepend(downloadLink);
 
 function getTotal(): number {
-  const totalString = Number.parseInt(
-    document
-      .querySelector('#header .h1Shelf .greyText')
-      ?.textContent?.replaceAll(/\D+/gu, '') ?? ''
-  );
-  if (Number.isNaN(totalString))
+  const shelfName = document.querySelector(
+    '#shelvesSection .selectedShelf'
+  )?.textContent;
+  const trimmed =
+    typeof shelfName === 'string'
+      ? shelfName.slice(shelfName.lastIndexOf('(')).replaceAll(/\D+/gu, '')
+      : '';
+  const number = Number.parseInt(trimmed, 10);
+  if (Number.isNaN(number))
     console.error('Unable to locate the total number of books on a shelf');
   const fallbackTotal = 1000;
-  return Number.isNaN(totalString) ? fallbackTotal : totalString;
+  return Number.isNaN(number) ? fallbackTotal : number;
 }
 
 /**
@@ -57,6 +60,7 @@ function displayDialog(total: number): {
   h1.textContent = commonText('downloading');
   dialog.append(h1);
   const progress = document.createElement('progress');
+  progress.classList.add('w-full');
   progress.setAttribute('max', total.toString());
 
   function updateProgress(percentage: number): void {

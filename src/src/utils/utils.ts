@@ -111,7 +111,7 @@ export function findLastIndex<T>(
   array: RA<T>,
   mapping: (item: T, index: number) => boolean
 ): number {
-  for (let index = array.length - 1; index >= 0; index--)
+  for (let index = array.length - 1; index >= 0; index -= 1)
     if (mapping(array[index], index)) return index;
   return -1;
 }
@@ -175,26 +175,34 @@ export function throttle(callback: () => void, wait: number): () => void {
   };
 }
 
-export function parseXml(string: string): Document | string {
-  const parsedXml = new window.DOMParser().parseFromString(string, 'text/xml');
+export function parseXml(
+  string: string,
+  type: 'text/xml' | 'text/html' = 'text/xml'
+): Element | string {
+  const parsedXml = new window.DOMParser().parseFromString(
+    string,
+    type
+  ).documentElement;
 
   // Chrome, Safari
-  const parseError =
-    parsedXml.documentElement.getElementsByTagName('parsererror')[0];
+  const parseError = parsedXml.getElementsByTagName('parsererror')[0];
   if (typeof parseError === 'object')
     return (parseError.children[1].textContent ?? parseError.innerHTML).trim();
   // Firefox
-  else if (parsedXml.documentElement.tagName === 'parsererror')
+  else if (parsedXml.tagName === 'parsererror')
     return (
-      parsedXml.documentElement.childNodes[0].nodeValue ??
-      parsedXml.documentElement.textContent ??
-      parsedXml.documentElement.innerHTML
+      parsedXml.childNodes[0].nodeValue ??
+      parsedXml.textContent ??
+      parsedXml.innerHTML
     ).trim();
   else return parsedXml;
 }
 
-export function strictParseXml(xml: string): Element {
-  const parsed = parseXml(xml);
+export function strictParseXml(
+  xml: string,
+  type: 'text/xml' | 'text/html' = 'text/xml'
+): Element {
+  const parsed = parseXml(xml, type);
   if (typeof parsed === 'string') throw new Error(parsed);
-  else return parsed.documentElement;
+  else return parsed;
 }

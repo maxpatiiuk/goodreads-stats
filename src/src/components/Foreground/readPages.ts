@@ -1,89 +1,213 @@
-import type { RA } from '../../utils/types';
+import type { RA, WritableArray } from '../../utils/types';
 import { strictParseXml } from '../../utils/utils';
 
+/**
+ * Fetch all pages of the RSS feed and extra information for each book
+ */
 export async function readPages(
   rssLink: string,
-  progress: (percentage: number) => void
+  progress: (count: number) => void
 ): Promise<{
   readonly description: string;
   readonly lastBuildDate: Date;
-  readonly items: RA<Item>;
+  readonly items: RA<BaseBook>;
 }> {
-  const rawItems = [];
   const xml = await fetch(rssLink)
     .then(async (response) => response.text())
-    .then((text) => {
-      rawItems.push(text);
-      return text;
-    })
     .then(strictParseXml);
   const description = xml.querySelector('description')?.textContent ?? '';
   const lastBuildDate = new Date(
     xml.querySelector('lastBuildDate')?.textContent ?? ''
   );
-  const items = xml.querySelectorAll('item');
   return {
     description,
     lastBuildDate,
-    rawItems,
-    items: [
-      ...items,
-      ...(items.length === 0 ? [] : await fetchPage(rssLink, 2)),
-    ].map(parseItem),
+    items: await fetchPage(xml, rssLink, progress),
   };
 }
 
-async function fetchPage(rssLink: string, page: number): Promise<RA<Element>> {
+/**
+ * Recursively fetch pages of the rss feed and extra information for each book
+ */
+async function fetchPage(
+  element: Element,
+  rssLink: string,
+  progress: (count: number) => void,
+  page = 2
+): Promise<RA<Book>> {
+  const rawItems = Array.from(element.querySelectorAll('item'));
+  const items = await parseItems(rawItems, progress);
+  if (items.length === 0) return [];
+
   const xml = await fetch(`${rssLink}&page=${page}`)
     .then(async (response) => response.text())
     .then(strictParseXml);
-  const items = xml.querySelectorAll('item');
-  return [...items, ...(items.length === 0 ? [] : await fetchPage(rssLink, 2))];
+  return [
+    ...items,
+    ...(await fetchPage(
+      xml,
+      rssLink,
+      (count) => progress(rawItems.length + count),
+      page + 1
+    )),
+  ];
 }
 
-// FIXME: test if all XML items have the same schema and date types
+/**
+ * Extract the information from the rss feed for fetched books, and fetch extra
+ * information for each book
+ */
+async function parseItems(
+  rawItems: RA<Element>,
+  progress: (index: number) => void
+): Promise<RA<Book>> {
+  const items = rawItems.map(parseItem);
+  const newItems: WritableArray<Book> = [];
+  // Using for-loop so as to make requests sequentially
+  // eslint-disable-next-line functional/no-loop-statement
+  for (const [index, item] of items.entries()) {
+    // eslint-disable-next-line no-await-in-loop
+    const extraDetails = await fetchExtraDetails(item.id);
+    newItems.push({ ...item, ...extraDetails });
+    progress(index);
+  }
+  return newItems;
+}
 
-const parseItem = (element: Element): Item => ({
-  title: element.querySelector('title')?.textContent ?? '',
-  link: element.querySelector('link')?.textContent ?? '',
-  bookId: element.querySelector('bookId')?.textContent ?? '',
-  bookImageUrl: element.querySelector('book_image_url')?.textContent ?? '',
-  bookSmallImageUrl:
-    element.querySelector('book_small_image_url')?.textContent ?? '',
-  bookMediumImageUrl:
-    element.querySelector('book_medium_image_url')?.textContent ?? '',
-  bookLargeImageUrl:
-    element.querySelector('book_large_image_url')?.textContent ?? '',
-  bookDescription: element.querySelector('book_description')?.textContent ?? '',
-  pageCount: Number.parseInt(
-    element.querySelector('book num_pages')?.textContent ?? ''
-  ),
-  authorName: element.querySelector('author_name')?.textContent ?? '',
-  userRating: element.querySelector('user_rating')?.textContent ?? '',
-  userDateAdded: element.querySelector('user_date_created')?.textContent ?? '',
-  userShelves: element.querySelector('user_shelves')?.textContent ?? '',
-  userReview: element.querySelector('user_review')?.textContent ?? '',
-  averageRating: element.querySelector('average_rating')?.textContent ?? '',
-  publicationYear: Number.parseInt(
-    element.querySelector('book_published')?.textContent ?? ''
-  ),
-});
+const selectors = {
+  title: 'title',
+  link: 'link',
+  id: 'book_id',
+  imageUrl: 'book_image_url',
+  smallImageUrl: 'book_small_image_url',
+  mediumImageUrl: 'book_medium_image_url',
+  largeImageUrl: 'book_large_image_url',
+  description: 'book_description',
+  pageCount: 'book num_pages',
+  authorName: 'author_name',
+  userRating: 'user_rating',
+  userDateAdded: 'user_date_created',
+  userShelves: 'user_shelves',
+  userReview: 'user_review',
+  averageRating: 'average_rating',
+  publicationYear: 'book_published',
+} as const;
+const parseItem = (element: Element): BaseBook =>
+  Object.fromEntries(
+    Object.entries(selectors).map(([key, selector]) => {
+      const content = element.querySelector(selector)?.textContent;
+      if (content === undefined)
+        console.warn(`Unable to find ${selector}`, content);
+      return [key, content ?? ''] as const;
+    })
+  );
 
-type Item = {
+type BaseBook = {
   readonly title: string;
   readonly link: string;
-  readonly bookId: string;
-  readonly bookImageUrl: string;
-  readonly bookSmallImageUrl: string;
-  readonly bookMediumImageUrl: string;
-  readonly bookLargeImageUrl: string;
-  readonly bookDescription: string;
-  readonly pageCount: number;
+  readonly id: string;
+  readonly imageUrl: string;
+  readonly smallImageUrl: string;
+  readonly mediumImageUrl: string;
+  readonly largeImageUrl: string;
+  readonly description: string;
+  readonly pageCount: string;
   readonly authorName: string;
   readonly userRating: string;
   readonly userDateAdded: string;
   readonly userShelves: string;
   readonly userReview: string;
   readonly averageRating: string;
-  readonly publicationYear: number;
+  readonly publicationYear: string;
 };
+
+type ExtraDetails = {
+  readonly readTimes: RA<{
+    readonly start: Date | undefined;
+    readonly end: Date | undefined;
+  }>;
+  readonly authorLink: string | undefined;
+  readonly publicationDateData: string | undefined;
+  readonly privateNotes: string | undefined;
+};
+
+export type Book = BaseBook & ExtraDetails;
+
+/**
+ * Read times are not included in the RSS feed, nor in the goodreads takeouts.
+ * Doesn't make any sense. Thus, have to make a separate request for each
+ */
+async function fetchExtraDetails(bookId: string): Promise<ExtraDetails> {
+  const xml = await fetch(`https://www.goodreads.com/review/edit/${bookId}`, {
+    headers: {
+      Accept: 'text/javascript',
+    },
+  })
+    .then(async (response) => response.text())
+    .then((response) =>
+      JSON.parse(
+        `"${response
+          .slice(response.indexOf("'") + 1, response.lastIndexOf("'"))
+          .replaceAll("\\'", "'")
+          .replaceAll('\\$', '$')}"`
+      )
+    )
+    .then((response) => strictParseXml(response, 'text/html'));
+
+  // eslint-disable-next-line array-func/from-map
+  const readTimes = Array.from(
+    xml.querySelectorAll('.readingSessionRow'),
+    (container) =>
+      Object.fromEntries(
+        inputs.map((name) => [
+          name,
+          container.querySelector<HTMLOptionElement>(
+            `.${name} option[selected]:not([disabled])`
+          )?.value,
+        ])
+      )
+  ).map(({ startYear, startMonth, startDay, endYear, endMonth, endDay }) => ({
+    start: toDate(startYear, startMonth, startDay),
+    end: toDate(endYear, endMonth, endDay),
+  }));
+
+  const authorLink =
+    document.querySelector<HTMLAnchorElement>('.authorName')?.href;
+  if (authorLink === undefined)
+    console.error('Could not find author link', xml);
+
+  const publicationDateData = document
+    .querySelector('.publicationDate')
+    ?.textContent?.trim();
+  if (publicationDateData === undefined)
+    console.error('Could not find publication date', xml);
+
+  const privateNotes =
+    document.querySelector<HTMLTextAreaElement>('#review_notes')?.value;
+  if (privateNotes === undefined)
+    console.error('Could not find private notes', xml);
+
+  return {
+    readTimes,
+    authorLink,
+    publicationDateData,
+    privateNotes,
+  };
+}
+
+const inputs = [
+  'startYear',
+  'startMonth',
+  'startDay',
+  'endYear',
+  'endMonth',
+  'endDay',
+];
+const toDate = (
+  year: string | undefined,
+  month: string | undefined,
+  day: string | undefined
+): Date | undefined =>
+  year === undefined || month === undefined || day === undefined
+    ? undefined
+    : new Date(`${year}-${month}-${day}`);

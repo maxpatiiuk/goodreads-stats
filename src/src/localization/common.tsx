@@ -7,6 +7,11 @@ export const commonText = createDictionary({
   goodreadsStats: { 'en-us': 'Goodreads Stats' },
   download: { 'en-us': 'Download' },
   downloading: { 'en-us': 'Downloading' },
-  cancel: { 'en-us': 'Cancel' },
+  filePickerMessage: {
+    'en-us': 'Choose a file or drag it here',
+  },
+  selectedFileName: {
+    'en-us': 'Selected file',
+  },
 });
 /* eslint-enable @typescript-eslint/naming-convention */
