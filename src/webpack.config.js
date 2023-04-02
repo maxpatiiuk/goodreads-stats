@@ -63,11 +63,12 @@ module.exports = (_env, argv) =>
     devtool:
       argv.mode === 'development' ? 'cheap-module-source-map' : 'source-map',
     entry: {
-      main:
-        argv.mode === 'development'
-          ? './src/components/Core/development.tsx'
-          : './src/components/Core/index.tsx',
+      foreground: './src/components/Foreground/index.ts',
       background: './src/components/Background/index.ts',
+      extension:
+        argv.mode === 'development'
+          ? './src/components/Extension/development.tsx'
+          : './src/components/Extension/index.tsx',
     },
     plugins:
       argv.mode === 'development'

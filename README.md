@@ -1,6 +1,6 @@
 # Goodreads Plus
 
-A browser extension for Goodreads that data export capability and extensive
+A browser extension for Goodreads that adds data export capability and
 displays extensive analytics about your reading habits.
 
 Features:
