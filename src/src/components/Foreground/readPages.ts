@@ -1,30 +1,36 @@
 import type { RA, WritableArray } from '../../utils/types';
 import { strictParseXml } from '../../utils/utils';
 
+/*
+ * FEATURE: retrieve entire timeline for a book
+ *  (when added to to-read list, any progress reported, other events)
+ */
 /**
  * Fetch all pages of the RSS feed and extra information for each book
  */
 export async function readPages(
   rssLink: string,
   progress: (count: number) => void
-): Promise<{
-  readonly description: string;
-  readonly lastBuildDate: Date;
-  readonly items: RA<BaseBook>;
-}> {
+): Promise<Takeout> {
   const xml = await fetch(rssLink)
     .then(async (response) => response.text())
     .then(strictParseXml);
   const description = xml.querySelector('description')?.textContent ?? '';
   const lastBuildDate = new Date(
     xml.querySelector('lastBuildDate')?.textContent ?? ''
-  );
+  ).toJSON();
   return {
     description,
     lastBuildDate,
-    items: await fetchPage(xml, rssLink, progress),
+    books: await fetchPage(xml, rssLink, progress),
   };
 }
+
+export type Takeout = {
+  readonly description: string;
+  readonly lastBuildDate: string;
+  readonly books: RA<BaseBook>;
+};
 
 /**
  * Recursively fetch pages of the rss feed and extra information for each book
@@ -123,8 +129,8 @@ type BaseBook = {
 
 type ExtraDetails = {
   readonly readTimes: RA<{
-    readonly start: Date | undefined;
-    readonly end: Date | undefined;
+    readonly start: string | undefined;
+    readonly end: string | undefined;
   }>;
   readonly authorLink: string | undefined;
   readonly publicationDateData: string | undefined;
@@ -167,8 +173,8 @@ async function fetchExtraDetails(bookId: string): Promise<ExtraDetails> {
         ])
       )
   ).map(({ startYear, startMonth, startDay, endYear, endMonth, endDay }) => ({
-    start: toDate(startYear, startMonth, startDay),
-    end: toDate(endYear, endMonth, endDay),
+    start: toDate(startYear, startMonth, startDay)?.toJSON(),
+    end: toDate(endYear, endMonth, endDay)?.toJSON(),
   }));
 
   const authorLink =

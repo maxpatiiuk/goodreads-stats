@@ -33,18 +33,18 @@ const button = (name: string, classList: string) =>
 export const className = {
   googleButton:
     'border border-solid p-2 rounded flex items-center gap-2 cursor-pointer cursor-pointer',
-  buttonWhite: `bg-white border-[#dadce0] active:bg-[#dadce0]
+  buttonPrimary: `bg-white border-[#dadce0] active:bg-[#dadce0]
     [&[aria-pressed]]:bg-[#dadce0] hover:bg-gray-100`,
 };
 
 export const Button = {
-  White: button('Button.White', className.buttonWhite),
-  Blue: button(
-    'Button.Blue',
+  Primary: button('Button.Primary', className.buttonPrimary),
+  Info: button(
+    'Button.Info',
     `border-blue-600 bg-blue-600 hover:bg-blue-700 active:bg-blue-500 text-white`
   ),
-  Red: button(
-    'Button.Blue',
+  Danger: button(
+    'Button.Danger',
     `border-red-600 bg-red-600 hover:bg-red-700 active:bg-red-500 text-white`
   ),
 };
@@ -52,6 +52,15 @@ export const Button = {
 export const Label = {
   Block: wrap('Label.Block', 'label', 'flex flex-col'),
 };
+
+export const ErrorMessage = wrap(
+  'ErrorMessage',
+  'div',
+  'flex flex-col gap-2 p-2 text-white bg-red-500 rounded',
+  {
+    role: 'alert',
+  }
+);
 
 export const Input = {
   Number({
