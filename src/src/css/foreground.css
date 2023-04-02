@@ -10,6 +10,11 @@
  * registered by plugins.
  */
 @import 'tailwindcss/components';
+@layer components {
+  .download-dialog::backdrop {
+    background: #0009;
+  }
+}
 
 /**
  * This injects Tailwind's utility classes and any utility classes registered
