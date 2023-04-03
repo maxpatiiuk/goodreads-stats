@@ -1,4 +1,4 @@
-import '../../css/main.css';
+import '../../css/extension.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 

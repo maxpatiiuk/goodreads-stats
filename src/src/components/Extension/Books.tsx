@@ -1,101 +1,87 @@
+import 'primeicons/primeicons.css';
+import 'primereact/resources/themes/viva-light/theme.css';
+import 'primereact/resources/primereact.css';
+
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import React from 'react';
 
+import { useStorage } from '../../hooks/useStorage';
 import { commonText } from '../../localization/common';
-import type { GetSet, RA, RR } from '../../utils/types';
-import { ensure, writable } from '../../utils/types';
+import { f } from '../../utils/functools';
+import type { GetSet, RA } from '../../utils/types';
+import { writable } from '../../utils/types';
+import { throttle } from '../../utils/utils';
 import { Button, Input, Label, Ul } from '../Atoms';
-import { Link } from '../Atoms/Link';
 import type { Book } from '../Foreground/readPages';
+import { dateColumns, numericColumns } from '../Foreground/readPages';
+import {
+  columns,
+  defaultFilters,
+  defaultSort,
+  defaultVisible,
+} from './Columns';
 
-const headers = {
-  title: commonText('title'),
-  link: undefined,
-  id: commonText('id'),
-  imageUrl: commonText('image'),
-  smallImageUrl: undefined,
-  mediumImageUrl: undefined,
-  largeImageUrl: undefined,
-  description: commonText('description'),
-  pageCount: commonText('pageCount'),
-  authorName: commonText('authorName'),
-  averageRating: commonText('averageRating'),
-  userRating: commonText('userRating'),
-  userReview: commonText('review'),
-  privateNotes: commonText('privateNotes'),
-  readTimes: commonText('readTimes'),
-  userDateAdded: commonText('dateAdded'),
-  userShelves: commonText('shelves'),
-  authorLink: undefined,
-  publicationYear: commonText('publicationYear'),
-  publicationDateData: commonText('publicationDate'),
-} as const;
-ensure<RR<keyof Book, string | undefined>>()(headers);
+const throttleRate = 5000;
 
-const defaultVisible: RR<keyof Book, boolean> = {
-  title: true,
-  link: false,
-  id: false,
-  imageUrl: true,
-  smallImageUrl: false,
-  mediumImageUrl: false,
-  largeImageUrl: false,
-  description: false,
-  pageCount: true,
-  authorName: true,
-  averageRating: true,
-  userRating: true,
-  userReview: false,
-  readTimes: true,
-  privateNotes: false,
-  userDateAdded: false,
-  userShelves: true,
-  authorLink: false,
-  publicationYear: true,
-  publicationDateData: false,
-};
-
-const renderers: Partial<RR<keyof Book, (book: Book) => JSX.Element | string>> =
-  {
-    id: ({ id, link }) => (
-      <Link.Default target="_blank" href={link}>
-        {id}
-      </Link.Default>
-    ),
-    title: ({ title, link }) => (
-      <Link.Default target="_blank" href={link}>
-        {title}
-      </Link.Default>
-    ),
-    imageUrl: ({ imageUrl }) => (
-      <img alt="" src={imageUrl} crossOrigin="anonymous" />
-    ),
-    authorName: ({ authorName, authorLink }) =>
-      authorLink === undefined ? (
-        authorName
-      ) : (
-        <Link.Default target="_blank" href={authorLink}>
-          {authorName}
-        </Link.Default>
-      ),
-    // FIXME: add UI
-    readTimes: ({ readTimes }) => JSON.stringify(readTimes),
-  };
-
-export function Books({ books }: { readonly books: RA<Book> }): JSX.Element {
-  const visibleColumns = React.useState(() => defaultVisible);
+export function Books({
+  books,
+  header,
+}: {
+  readonly books: RA<Book>;
+  readonly header: JSX.Element;
+}): JSX.Element {
+  const [state, setState] = useStorage('primeVue');
+  const throttledSet = React.useMemo(
+    () => throttle(setState, throttleRate),
+    [setState]
+  );
+  const visibleColumns = React.useState(defaultVisible);
   return (
     <DataTable
-      header={<VisibleColumns visibleColumns={visibleColumns} />}
+      className="!h-0 flex-1"
+      customRestoreState={() => state}
+      customSaveState={throttledSet}
+      dataKey="id"
+      emptyMessage={commonText('noBooksFound')}
+      filterDisplay="menu"
+      filters={defaultFilters}
+      header={
+        <div className="flex gap-2">
+          {header}
+          <span className="-ml-2 flex-1" />
+          <VisibleColumns visibleColumns={visibleColumns} />
+        </div>
+      }
+      multiSortMeta={writable(defaultSort)}
+      removableSort
+      reorderableColumns
+      scrollable
+      scrollHeight="flex"
+      sortMode="multiple"
+      stateStorage="custom"
+      stripedRows
       tableStyle={{ minWidth: '50rem' }}
       value={writable(books)}
-      stripedRows
     >
-      {Object.entries(headers).map(([key, header]) =>
-        header !== undefined && visibleColumns[0][key] ? (
-          <Column field={key} header={header} key={key} body={renderers[key]} />
+      {Object.entries(columns).map(([key, config]) =>
+        config !== undefined && visibleColumns[0].includes(key) ? (
+          <Column
+            body={config.renderer}
+            dataType={
+              f.includes(numericColumns, key)
+                ? 'numeric'
+                : f.includes(dateColumns, key)
+                ? 'date'
+                : 'text'
+            }
+            field={key}
+            filter={config.defaultFilter !== undefined}
+            filterField={config.filterField}
+            header={config.header}
+            key={key}
+          />
         ) : undefined
       )}
     </DataTable>
@@ -105,7 +91,7 @@ export function Books({ books }: { readonly books: RA<Book> }): JSX.Element {
 function VisibleColumns({
   visibleColumns: [visibleColumns, setVisibleColumns],
 }: {
-  readonly visibleColumns: GetSet<typeof defaultVisible>;
+  readonly visibleColumns: GetSet<RA<keyof Book>>;
 }): JSX.Element {
   const overlayRef = React.useRef<OverlayPanel | null>(null);
   return (
@@ -117,19 +103,20 @@ function VisibleColumns({
       </Button.Primary>
       <OverlayPanel ref={overlayRef}>
         <Ul>
-          {Object.entries(headers).map(([key, header]) =>
-            header === undefined ? undefined : (
-              <Label.Inline key={key}>
+          {Object.entries(columns).map(([header, config]) =>
+            config === undefined ? undefined : (
+              <Label.Inline key={header}>
                 <Input.Checkbox
-                  checked={visibleColumns[key]}
+                  checked={f.includes(visibleColumns, config)}
                   onValueChange={(isChecked): void =>
-                    setVisibleColumns({
-                      ...visibleColumns,
-                      [key]: isChecked,
-                    })
+                    setVisibleColumns(
+                      isChecked
+                        ? [...visibleColumns, header]
+                        : visibleColumns.filter((column) => column !== header)
+                    )
                   }
                 />
-                {header}
+                {config.header}
               </Label.Inline>
             )
           )}

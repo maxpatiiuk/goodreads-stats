@@ -14,4 +14,8 @@ export const f = {
   includes: <T>(array: RA<T>, item: unknown): item is T =>
     array.includes(item as T),
   unique: <ITEM>(array: RA<ITEM>): RA<ITEM> => Array.from(new Set(array)),
+  parseInt(value: string): number | undefined {
+    const parsed = Number.parseInt(value);
+    return Number.isNaN(parsed) ? undefined : parsed;
+  },
 } as const;

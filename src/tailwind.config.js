@@ -8,16 +8,12 @@ module.exports = {
   content: ['./src/**/*.{ts,tsx,js}'],
   // Disable unneeded components to reduce performance impact
   corePlugins: {
-    // Tailwind style reset breaks Google Calendar styling
-    preflight: false,
     float: false,
     clear: false,
     skew: false,
     caretColor: false,
     sepia: false,
   },
-  // Enable dark mode if body has "dark" class names
-  darkMode: 'class',
   theme: {
     // Make default border radius more rounded
     borderRadius: {

@@ -32,9 +32,6 @@ export const commonText = createDictionary({
   lastUpdated: {
     'en-us': 'Last updated:',
   },
-  books: {
-    'en-us': 'Books',
-  },
   title: {
     'en-us': 'Title',
   },
@@ -71,9 +68,6 @@ export const commonText = createDictionary({
   publicationYear: {
     'en-us': 'Publication year',
   },
-  publicationDate: {
-    'en-us': 'Publication date',
-  },
   privateNotes: {
     'en-us': 'Private notes',
   },
@@ -85,6 +79,9 @@ export const commonText = createDictionary({
   },
   columns: {
     'en-us': 'Columns',
+  },
+  noBooksFound: {
+    'en-us': 'No books found. Please try a different search.',
   },
 });
 /* eslint-enable @typescript-eslint/naming-convention */

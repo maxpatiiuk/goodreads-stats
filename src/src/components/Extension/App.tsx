@@ -12,8 +12,8 @@ export function App(): JSX.Element | null {
     undefined
   );
   return (
-    <>
-      <h1>{commonText('goodreadsStats')}</h1>
+    <div className="flex flex-col gap-4 p-8 md:h-screen">
+      <h1 className="text-2xl">{commonText('goodreadsStats')}</h1>
       {data === undefined ? (
         <>
           <p>{commonText('goodreadsStatsDescription')}</p>
@@ -42,22 +42,21 @@ export function App(): JSX.Element | null {
       ) : (
         <Dashboard takeout={data} />
       )}
-    </>
+    </div>
   );
 }
 
 function Dashboard({ takeout }: { readonly takeout: Takeout }): JSX.Element {
   return (
     <>
-      <h2>{takeout.description}</h2>
       <p>
         {commonText('lastUpdated')}
         <DateElement date={takeout.lastBuildDate} />
       </p>
-      <h3>
-        {commonText('books')}
-        <Books books={takeout.books} />
-      </h3>
+      <Books
+        books={takeout.books}
+        header={<h2 className="text-xl">{takeout.description}</h2>}
+      />
     </>
   );
 }

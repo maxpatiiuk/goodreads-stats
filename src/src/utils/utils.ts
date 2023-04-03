@@ -160,24 +160,25 @@ export function debounce(callback: () => void, timeout: number): () => void {
 /**
  * Based on simplified version of Underscore.js's throttle function
  */
-export function throttle(callback: () => void, wait: number): () => void {
-  let timeout: ReturnType<typeof setTimeout>;
+export function throttle<T extends RA<unknown>>(
+  callback: (...args: T) => void,
+  wait: number
+): (...args: T) => void {
   let previous = 0;
-
-  return (): void => {
+  return (...newArguments: T): void => {
     const time = Date.now();
+    previous ??= time;
     const remaining = wait - (time - previous);
     if (remaining <= 0 || remaining > wait) {
-      clearTimeout(timeout);
       previous = time;
-      callback();
+      callback(...newArguments);
     }
   };
 }
 
 export function parseXml(
   string: string,
-  type: 'text/xml' | 'text/html' = 'text/xml'
+  type: 'text/html' | 'text/xml' = 'text/xml'
 ): Element | string {
   const parsedXml = new window.DOMParser().parseFromString(
     string,
@@ -200,7 +201,7 @@ export function parseXml(
 
 export function strictParseXml(
   xml: string,
-  type: 'text/xml' | 'text/html' = 'text/xml'
+  type: 'text/html' | 'text/xml' = 'text/xml'
 ): Element {
   const parsed = parseXml(xml, type);
   if (typeof parsed === 'string') throw new Error(parsed);

@@ -49,15 +49,15 @@ export const Button = {
   ),
 };
 
-export const Ul = wrap('Ul', 'ul', '', { role: 'list' });
+export const Ul = wrap('Ul', 'ul', 'flex flex-col gap-2', { role: 'list' });
 
 export const Label = {
-  Inline: wrap('Label.Inline', 'label', 'flex flex-col'),
-  Block: wrap(
-    'Label.Block',
+  Inline: wrap(
+    'Label.Inline',
     'label',
     'cursor-pointer inline-flex gap-1 items-center'
   ),
+  Block: wrap('Label.Block', 'label', 'flex flex-col'),
 };
 
 export const ErrorMessage = wrap(

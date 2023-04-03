@@ -1,5 +1,7 @@
+import { f } from '../../utils/functools';
 import type { RA, WritableArray } from '../../utils/types';
 import { strictParseXml } from '../../utils/utils';
+import { ensure } from '../../utils/types';
 
 /*
  * FEATURE: retrieve entire timeline for a book
@@ -105,9 +107,20 @@ const parseItem = (element: Element): BaseBook =>
       const content = element.querySelector(selector)?.textContent;
       if (content === undefined)
         console.warn(`Unable to find ${selector}`, content);
-      return [key, content ?? ''] as const;
+      const value = f.includes(numericColumns, key)
+        ? (f.parseInt(content ?? '') as string | undefined) ?? content
+        : content;
+      return [key, value ?? ''] as const;
     })
   );
+
+export const numericColumns = ensure<RA<keyof Book>>()([
+  'pageCount',
+  'averageRating',
+  'userRating',
+  'publicationYear',
+] as const);
+export const dateColumns = ensure<RA<keyof Book>>()(['userDateAdded'] as const);
 
 type BaseBook = {
   readonly title: string;
@@ -118,14 +131,14 @@ type BaseBook = {
   readonly mediumImageUrl: string;
   readonly largeImageUrl: string;
   readonly description: string;
-  readonly pageCount: string;
+  readonly pageCount: number | string;
   readonly authorName: string;
   readonly userRating: string;
   readonly userDateAdded: string;
   readonly userShelves: string;
   readonly userReview: string;
-  readonly averageRating: string;
-  readonly publicationYear: string;
+  readonly averageRating: number | string;
+  readonly publicationYear: number | string;
 };
 
 type ExtraDetails = {
@@ -134,7 +147,6 @@ type ExtraDetails = {
     readonly end: string | undefined;
   }>;
   readonly authorLink: string | undefined;
-  readonly publicationDateData: string | undefined;
   readonly privateNotes: string | undefined;
 };
 
@@ -183,12 +195,6 @@ async function fetchExtraDetails(bookId: string): Promise<ExtraDetails> {
   if (authorLink === undefined)
     console.error('Could not find author link', xml);
 
-  const publicationDateData = document
-    .querySelector('.publicationDate')
-    ?.textContent?.trim();
-  if (publicationDateData === undefined)
-    console.error('Could not find publication date', xml);
-
   const privateNotes =
     document.querySelector<HTMLTextAreaElement>('#review_notes')?.value;
   if (privateNotes === undefined)
@@ -197,7 +203,6 @@ async function fetchExtraDetails(bookId: string): Promise<ExtraDetails> {
   return {
     readTimes,
     authorLink,
-    publicationDateData,
     privateNotes,
   };
 }

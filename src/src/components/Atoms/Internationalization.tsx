@@ -6,7 +6,6 @@ import { commonText } from '../../localization/common';
 import { LANGUAGE } from '../../localization/utils';
 import type { RA } from '../../utils/types';
 import { capitalize } from '../../utils/utils';
-import type { SupportedView } from '../Contexts/CurrentViewContext';
 
 /* This is an incomplete definition. For complete, see MDN Docs */
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -182,8 +181,10 @@ const dateFormatters = {
   }),
 } as const;
 
-export const formatDateLabel = (date: Date, view: SupportedView): string =>
-  dateFormatters[view].format(date);
+export const formatDateLabel = (
+  date: Date,
+  view: keyof typeof dateFormatters
+): string => dateFormatters[view].format(date);
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 export const compareStrings = new Intl.Collator(
@@ -194,15 +195,3 @@ export const compareStrings = new Intl.Collator(
     ignorePunctuation: true,
   }
 ).compare;
-
-/**
- * Format duration in minutes into an hours+minutes string
- */
-export function formatDuration(duration: number): string {
-  const hours = Math.floor(duration / MINUTES_IN_HOUR);
-  const minutes = duration % MINUTES_IN_HOUR;
-  const formattedMinutes = `${minutes} ${commonText('minutes')}`;
-  return hours === 0
-    ? formattedMinutes
-    : `${hours} ${commonText('hours')} ${formattedMinutes}`;
-}

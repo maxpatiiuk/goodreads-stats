@@ -9,9 +9,12 @@ type StorageItem<T> = {
   readonly defaultValue: T;
 };
 
-export const storageDefinitions = ensure<IR<StorageItem<unknown>>>()(
-  {} as const
-);
+export const storageDefinitions = ensure<IR<StorageItem<unknown>>>()({
+  primeVue: {
+    type: 'local',
+    defaultValue: undefined as unknown as object,
+  },
+} as const);
 
 export type StorageDefinitions = typeof storageDefinitions;
 

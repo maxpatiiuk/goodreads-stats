@@ -1,4 +1,11 @@
 /**
+ * This injects Tailwind's base styles and any base styles registered by
+ * plugins.
+ */
+@import 'tailwindcss/base';
+@import './base.css';
+
+/**
  * This injects Tailwind's component classes and any component classes
  * registered by plugins.
  */
@@ -9,9 +16,4 @@
  * by plugins.
  */
 @import 'tailwindcss/utilities';
-
-@layer components {
-  .download-dialog::backdrop {
-    background: #0009;
-  }
-}
+@import './utilities.css';
