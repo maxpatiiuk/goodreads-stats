@@ -62,6 +62,9 @@ export const columns: RR<
     header: commonText('description'),
     defaultVisible: false,
     defaultFilter: FilterMatchMode.CONTAINS,
+    renderer: ({ description }) => (
+      <p dangerouslySetInnerHTML={{ __html: description }} />
+    ),
   },
   pageCount: {
     header: commonText('pageCount'),

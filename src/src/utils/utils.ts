@@ -4,7 +4,7 @@
  * @module
  */
 import { f } from './functools';
-import type { IR, RA } from './types';
+import type { IR, RA, RR } from './types';
 
 export const capitalize = <T extends string>(string: T): Capitalize<T> =>
   (string.charAt(0).toUpperCase() + string.slice(1)) as Capitalize<T>;
@@ -135,6 +135,16 @@ export const group = <KEY, VALUE>(
       )
       .entries()
   );
+
+export const count = <T extends PropertyKey>(array: RA<T>): RR<T, number> =>
+  array.reduce<Partial<Record<T, number>>>((counts, item) => {
+    counts[item] ??= 0;
+    counts[item]! += 1;
+    return counts;
+  }, {}) as RR<T, number>;
+
+export const sum = (array: RA<number>): number =>
+  array.reduce((sum, value) => sum + value, 0);
 
 // Find a value in an array, and return it's mapped variant
 export function mappedFind<ITEM, RETURN_TYPE>(

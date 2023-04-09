@@ -1,3 +1,4 @@
+import { TabPanel, TabView } from 'primereact/tabview';
 import React from 'react';
 
 import { commonText } from '../../localization/common';
@@ -6,7 +7,6 @@ import type { Takeout } from '../Foreground/readPages';
 import { DateElement } from '../Molecules/DateElement';
 import { FilePicker, fileToText } from '../Molecules/FilePicker';
 import { Books } from './Books';
-import { TabPanel, TabView } from 'primereact/tabview';
 import { Search } from './Search';
 
 export function App(): JSX.Element | null {
@@ -56,14 +56,14 @@ function Dashboard({ takeout }: { readonly takeout: Takeout }): JSX.Element {
         {commonText('lastUpdated')}
         <DateElement date={takeout.lastBuildDate} />
       </p>
-      <TabView>
-        <TabPanel header={commonText('allBooks')}>
+      <TabView className="contents" panelContainerClassName="contents">
+        <TabPanel className="contents" header={commonText('allBooks')}>
           <Books books={takeout.books} header={header} standalone />
         </TabPanel>
-        <TabPanel header={commonText('search')}>
+        <TabPanel className="contents" header={commonText('search')}>
           <Search books={takeout.books} header={header} />
         </TabPanel>
-        <TabPanel header={commonText('stats')}>
+        <TabPanel className="contents" header={commonText('stats')}>
           {/* FIXME: implement */}
         </TabPanel>
       </TabView>
