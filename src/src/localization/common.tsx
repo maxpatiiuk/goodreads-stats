@@ -83,5 +83,14 @@ export const commonText = createDictionary({
   noBooksFound: {
     'en-us': 'No books found. Please try a different search.',
   },
+  allBooks: {
+    'en-us': 'All books',
+  },
+  search: {
+    'en-us': 'Search',
+  },
+  stats: {
+    'en-us': 'Stats',
+  },
 });
 /* eslint-enable @typescript-eslint/naming-convention */

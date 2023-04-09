@@ -6,6 +6,8 @@ import type { Takeout } from '../Foreground/readPages';
 import { DateElement } from '../Molecules/DateElement';
 import { FilePicker, fileToText } from '../Molecules/FilePicker';
 import { Books } from './Books';
+import { TabPanel, TabView } from 'primereact/tabview';
+import { Search } from './Search';
 
 export function App(): JSX.Element | null {
   const [data, setData] = React.useState<Takeout | string | undefined>(
@@ -47,16 +49,24 @@ export function App(): JSX.Element | null {
 }
 
 function Dashboard({ takeout }: { readonly takeout: Takeout }): JSX.Element {
+  const header = <h2 className="text-xl">{takeout.description}</h2>;
   return (
     <>
       <p>
         {commonText('lastUpdated')}
         <DateElement date={takeout.lastBuildDate} />
       </p>
-      <Books
-        books={takeout.books}
-        header={<h2 className="text-xl">{takeout.description}</h2>}
-      />
+      <TabView>
+        <TabPanel header={commonText('allBooks')}>
+          <Books books={takeout.books} header={header} standalone />
+        </TabPanel>
+        <TabPanel header={commonText('search')}>
+          <Search books={takeout.books} header={header} />
+        </TabPanel>
+        <TabPanel header={commonText('stats')}>
+          {/* FIXME: implement */}
+        </TabPanel>
+      </TabView>
     </>
   );
 }

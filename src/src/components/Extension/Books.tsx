@@ -28,9 +28,11 @@ const throttleRate = 5000;
 export function Books({
   books,
   header,
+  standalone,
 }: {
   readonly books: RA<Book>;
   readonly header: JSX.Element;
+  readonly standalone: boolean;
 }): JSX.Element {
   const [state, setState] = useStorage('primeVue');
   const throttledSet = React.useMemo(
@@ -54,13 +56,13 @@ export function Books({
           <VisibleColumns visibleColumns={visibleColumns} />
         </div>
       }
-      multiSortMeta={writable(defaultSort)}
-      removableSort
+      multiSortMeta={standalone ? writable(defaultSort) : undefined}
+      removableSort={standalone}
       reorderableColumns
       scrollable
       scrollHeight="flex"
-      sortMode="multiple"
-      stateStorage="custom"
+      sortMode={standalone ? 'multiple' : undefined}
+      stateStorage={standalone ? 'custom' : undefined}
       stripedRows
       tableStyle={{ minWidth: '50rem' }}
       value={writable(books)}
