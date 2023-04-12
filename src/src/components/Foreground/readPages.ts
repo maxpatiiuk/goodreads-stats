@@ -1,7 +1,8 @@
 import { f } from '../../utils/functools';
+import { formatUrl } from '../../utils/queryString';
 import type { RA, WritableArray } from '../../utils/types';
-import { strictParseXml } from '../../utils/utils';
 import { ensure } from '../../utils/types';
+import { strictParseXml } from '../../utils/utils';
 
 /*
  * FEATURE: retrieve entire timeline for a book
@@ -75,7 +76,7 @@ async function parseItems(
   // eslint-disable-next-line functional/no-loop-statement
   for (const [index, item] of items.entries()) {
     // eslint-disable-next-line no-await-in-loop
-    const extraDetails = await fetchExtraDetails(item.id);
+    const extraDetails = await fetchExtraDetails(item);
     newItems.push({ ...item, ...extraDetails });
     progress(index);
   }
@@ -116,6 +117,7 @@ const parseItem = (element: Element): BaseBook =>
 
 export const numericColumns = ensure<RA<keyof Book>>()([
   'pageCount',
+  'resolvedPageCount',
   'averageRating',
   'userRating',
   'publicationYear',
@@ -148,6 +150,11 @@ type ExtraDetails = {
   }>;
   readonly authorLink: string | undefined;
   readonly privateNotes: string | undefined;
+  /**
+   * For audiobooks, the page count is representing number of hours, not number
+   * of pages. Thus, have ot manually resolve it
+   */
+  readonly resolvedPageCount: number | string | undefined;
 };
 
 export type Book = BaseBook & ExtraDetails;
@@ -156,8 +163,8 @@ export type Book = BaseBook & ExtraDetails;
  * Read times are not included in the RSS feed, nor in the goodreads takeouts.
  * Doesn't make any sense. Thus, have to make a separate request for each
  */
-async function fetchExtraDetails(bookId: string): Promise<ExtraDetails> {
-  const xml = await fetch(`https://www.goodreads.com/review/edit/${bookId}`, {
+async function fetchExtraDetails(book: BaseBook): Promise<ExtraDetails> {
+  const html = await fetch(`https://www.goodreads.com/review/edit/${book.id}`, {
     headers: {
       Accept: 'text/javascript',
     },
@@ -175,7 +182,7 @@ async function fetchExtraDetails(bookId: string): Promise<ExtraDetails> {
 
   // eslint-disable-next-line array-func/from-map
   const readTimes = Array.from(
-    xml.querySelectorAll('.readingSessionRow'),
+    html.querySelectorAll('.readingSessionRow'),
     (container) =>
       Object.fromEntries(
         inputs.map((name) => [
@@ -190,22 +197,40 @@ async function fetchExtraDetails(bookId: string): Promise<ExtraDetails> {
     end: toDate(endYear, endMonth, endDay)?.toJSON(),
   }));
 
-  const authorLink =
-    document.querySelector<HTMLAnchorElement>('.authorName')?.href;
+  const authorLink = html.querySelector<HTMLAnchorElement>('.authorName')?.href;
   if (authorLink === undefined)
-    console.error('Could not find author link', xml);
+    console.error('Could not find author link', html);
 
   const privateNotes =
-    document.querySelector<HTMLTextAreaElement>('#review_notes')?.value;
+    html.querySelector<HTMLTextAreaElement>('#review_notes')?.value;
   if (privateNotes === undefined)
-    console.error('Could not find private notes', xml);
+    console.error('Could not find private notes', html);
+
+  const editionsUrl = html.querySelector<HTMLAnchorElement>(
+    'a[href*="/editions/"]'
+  )?.href;
 
   return {
     readTimes,
     authorLink,
     privateNotes,
+    resolvedPageCount:
+      /**
+       * For audiobooks, the page count represents number of hours, not number of
+       * pages. Thus, have to manually resolve it so that the charts represent
+       * accurate data. The RSS feed does not have an indication of whether a book
+       * is an audiobook, thus have to manually check any book under 100
+       * pages(hours)
+       */
+      (typeof book.pageCount !== 'number' ||
+        book.pageCount < maxAudioBookHours) &&
+      typeof editionsUrl === 'string'
+        ? await fetchPageCount(editionsUrl, book.pageCount)
+        : undefined,
   };
 }
+
+const maxAudioBookHours = 100;
 
 const inputs = [
   'startYear',
@@ -223,3 +248,43 @@ const toDate = (
   year === undefined || month === undefined || day === undefined
     ? undefined
     : new Date(`${year}-${month}-${day}`);
+
+/**
+ * Retrieve page count for the most popular non-audiobook edition of this book
+ */
+async function fetchPageCount(
+  editionsUrl: string,
+  rawPageCount: number | string
+): Promise<number | string> {
+  const fullUrl = formatUrl(editionsUrl, {
+    sort: 'num_ratings',
+  });
+  const html = await fetch(fullUrl, { headers: { Accept: 'text/html' } })
+    .then(async (response) => response.text())
+    .then((response) => strictParseXml(response, 'text/html'));
+  const editions = Array.from(
+    html.querySelectorAll('.elementList'),
+    (element) => {
+      const format = element.querySelector(
+        '.editionData > .dataRow:nth-child(3)'
+      )?.textContent;
+      return {
+        isCurrent: element.querySelector('.wtrButtonContainer') !== null,
+        isAudioBook:
+          typeof format === 'string' &&
+          // This might not work for non-english interface (though Audible still would match)
+          (format.toLowerCase().includes('audi') || format.includes('CD')),
+        pages: f.parseInt(
+          format?.split(',').at(-1)?.replaceAll(/\D+/gu, '') ?? ''
+        ),
+      };
+    }
+  );
+  const current = editions.find(({ isCurrent }) => isCurrent);
+  if (current?.isAudioBook === false) return rawPageCount;
+  const resolvedPageCount = editions.find(
+    ({ pages, isAudioBook }) => typeof pages === 'number' && !isAudioBook
+  )?.pages;
+
+  return resolvedPageCount ?? rawPageCount;
+}

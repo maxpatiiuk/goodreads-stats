@@ -44,6 +44,9 @@ export const commonText = createDictionary({
   description: {
     'en-us': 'Description',
   },
+  originalPageCount: {
+    'en-us': 'Original Page count',
+  },
   pageCount: {
     'en-us': 'Page count',
   },

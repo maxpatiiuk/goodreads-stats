@@ -71,6 +71,11 @@ export const columns: RR<
     // FIXME: implement charts
   },
   pageCount: {
+    header: commonText('originalPageCount'),
+    defaultVisible: false,
+    defaultFilter: FilterMatchMode.GREATER_THAN_OR_EQUAL_TO,
+  },
+  resolvedPageCount: {
     header: commonText('pageCount'),
     defaultVisible: true,
     defaultFilter: FilterMatchMode.GREATER_THAN_OR_EQUAL_TO,
