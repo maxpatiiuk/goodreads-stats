@@ -11,12 +11,8 @@ type StorageItem<T> = {
 
 export const storageDefinitions = ensure<IR<StorageItem<unknown>>>()({
   primeVue: {
-    type: 'local',
+    type: 'local' as 'local' | 'sync',
     defaultValue: undefined as unknown as object,
-  },
-  chartType: {
-    type: 'sync',
-    defaultValue: 'books' as 'books' | 'pages',
   },
 } as const);
 

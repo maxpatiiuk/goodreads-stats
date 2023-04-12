@@ -104,5 +104,11 @@ export const commonText = createDictionary({
   month: {
     'en-us': 'Month',
   },
+  booksPerYear: {
+    'en-us': 'Books per year',
+  },
+  pagesPerYear: {
+    'en-us': 'Pages per year',
+  },
 });
 /* eslint-enable @typescript-eslint/naming-convention */

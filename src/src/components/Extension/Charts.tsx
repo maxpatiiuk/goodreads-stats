@@ -10,12 +10,12 @@ import {
   PointElement,
   LineElement,
   Colors,
+  Title,
   Legend,
 } from 'chart.js';
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 
-import { useStorage } from '../../hooks/useStorage';
 import { commonText } from '../../localization/common';
 import type { R, RA } from '../../utils/types';
 import type { Book } from '../Foreground/readPages';
@@ -29,53 +29,72 @@ Chart.register(
   PointElement,
   LineElement,
   Colors,
+  Title,
   Legend
 );
 
 export function Charts({ books }: { readonly books: RA<Book> }): JSX.Element {
-  // FIXME: provide a way to change this
-  const [type = 'books'] = useStorage('chartType');
-  const datasets = React.useMemo(() => getData(books, type), [books, type]);
   return (
-    <div>
-      <Line
-        className="flex-1"
-        data={{
-          datasets,
-        }}
-        // FIXME: tooltips
-        options={{
-          responsive: true,
-          plugins: {
-            legend: {},
-          },
-          scales: {
-            x: {
-              type: 'time',
-              time: {
-                unit: 'month',
-                displayFormats: {
-                  month: 'MMM',
-                },
-              },
-              title: {
-                text: commonText('month'),
-              },
-              // FIXME: test which of these options are required
-              ticks: {
-                autoSkip: false,
-              },
-            },
-            y: {
-              title: {
-                text:
-                  type === 'books' ? commonText('books') : commonText('pages'),
-              },
-            },
-          },
-        }}
-      />
+    <div className="flex flex-col gap-8">
+      <LineChart books={books} count="books" />
+      <LineChart books={books} count="pages" />
     </div>
+  );
+}
+
+function LineChart({
+  books,
+  count,
+}: {
+  readonly books: RA<Book>;
+  readonly count: 'books' | 'pages';
+}) {
+  const datasets = React.useMemo(() => getData(books, count), [books, count]);
+  return (
+    <Line
+      className="flex-1"
+      data={{
+        datasets,
+      }}
+      // FIXME: tooltips
+      options={{
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text:
+              count === 'books'
+                ? commonText('booksPerYear')
+                : commonText('pagesPerYear'),
+          },
+          legend: {},
+        },
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'month',
+              displayFormats: {
+                month: 'MMM',
+              },
+            },
+            title: {
+              text: commonText('month'),
+            },
+            // FIXME: test which of these options are required
+            ticks: {
+              autoSkip: false,
+            },
+          },
+          y: {
+            title: {
+              text:
+                count === 'books' ? commonText('books') : commonText('pages'),
+            },
+          },
+        },
+      }}
+    />
   );
 }
 
