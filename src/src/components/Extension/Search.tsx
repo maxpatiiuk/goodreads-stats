@@ -102,7 +102,6 @@ function index(allBooks: RA<Book>): Index {
           ] as const
       )
     );
-    if (bookIndex === 12) debugger;
     return normalize(vector);
   });
 

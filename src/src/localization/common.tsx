@@ -92,5 +92,14 @@ export const commonText = createDictionary({
   stats: {
     'en-us': 'Stats',
   },
+  books: {
+    'en-us': 'Books',
+  },
+  pages: {
+    'en-us': 'Pages',
+  },
+  month: {
+    'en-us': 'Month',
+  },
 });
 /* eslint-enable @typescript-eslint/naming-convention */

@@ -14,6 +14,10 @@ export const storageDefinitions = ensure<IR<StorageItem<unknown>>>()({
     type: 'local',
     defaultValue: undefined as unknown as object,
   },
+  chartType: {
+    type: 'sync',
+    defaultValue: 'books' as 'books' | 'pages',
+  },
 } as const);
 
 export type StorageDefinitions = typeof storageDefinitions;
@@ -44,8 +48,7 @@ export function useStorage<NAME extends keyof StorageDefinitions>(
           );
         }),
       [name, type]
-    ),
-    false
+    )
   );
 
   const updateValue = React.useCallback(

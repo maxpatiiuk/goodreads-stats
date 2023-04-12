@@ -8,6 +8,7 @@ import { DateElement } from '../Molecules/DateElement';
 import { FilePicker, fileToText } from '../Molecules/FilePicker';
 import { Books } from './Books';
 import { Search } from './Search';
+import { Charts } from './Charts';
 
 export function App(): JSX.Element | null {
   const [data, setData] = React.useState<Takeout | string | undefined>(
@@ -64,7 +65,7 @@ function Dashboard({ takeout }: { readonly takeout: Takeout }): JSX.Element {
           <Search books={takeout.books} header={header} />
         </TabPanel>
         <TabPanel className="contents" header={commonText('stats')}>
-          {/* FIXME: implement */}
+          <Charts books={takeout.books} />
         </TabPanel>
       </TabView>
     </>
