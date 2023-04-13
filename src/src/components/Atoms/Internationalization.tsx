@@ -95,9 +95,12 @@ function getMonthNames(monthFormat: 'long' | 'short'): RA<string> {
     months.format(new Date(0, month, 2, 0, 0, 0))
   );
 }
-
-// Localized month names
 export const months = getMonthNames('long');
+
+export const dateFormatter = new Intl.DateTimeFormat(LANGUAGE, {
+  month: 'long',
+  day: 'numeric',
+});
 
 const listFormatter = new Intl.ListFormat(LANGUAGE, {
   style: 'long',

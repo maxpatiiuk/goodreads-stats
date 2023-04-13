@@ -16,12 +16,13 @@ export const camelToHuman = (value: string): string =>
 export const sortFunction =
   <T, V extends boolean | number | string | null | undefined>(
     mapper: (value: T) => V,
-    reverse = false
+    reverse: true | undefined = undefined
   ): ((left: T, right: T) => -1 | 0 | 1) =>
   (left: T, right: T): -1 | 0 | 1 => {
-    const [leftValue, rightValue] = reverse
-      ? [mapper(right), mapper(left)]
-      : [mapper(left), mapper(right)];
+    const [leftValue, rightValue] =
+      reverse === true
+        ? [mapper(right), mapper(left)]
+        : [mapper(left), mapper(right)];
     if (leftValue === rightValue) return 0;
     else if (typeof leftValue === 'string' && typeof rightValue === 'string')
       return leftValue.localeCompare(rightValue) as -1 | 0 | 1;

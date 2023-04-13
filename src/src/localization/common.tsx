@@ -110,5 +110,8 @@ export const commonText = createDictionary({
   pagesPerYear: {
     'en-us': 'Pages per year',
   },
+  year: {
+    'en-us': 'Year',
+  },
 });
 /* eslint-enable @typescript-eslint/naming-convention */

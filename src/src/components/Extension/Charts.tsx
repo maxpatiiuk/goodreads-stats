@@ -3,23 +3,28 @@ import 'chartjs-adapter-date-fns';
 import type { ChartDataset } from 'chart.js';
 import {
   Chart,
-  LineController,
-  Tooltip,
-  LinearScale,
-  TimeScale,
-  PointElement,
-  LineElement,
   Colors,
-  Title,
   Legend,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  TimeScale,
+  Title,
+  Tooltip,
 } from 'chart.js';
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 
 import { commonText } from '../../localization/common';
+import { f } from '../../utils/functools';
 import type { R, RA } from '../../utils/types';
-import type { Book } from '../Foreground/readPages';
+import { filterArray } from '../../utils/types';
 import { sortFunction } from '../../utils/utils';
+import { Label, Select } from '../Atoms';
+import type { Book } from '../Foreground/readPages';
+import { YearCharts } from './YearCharts';
+import { dateFormatter } from '../Atoms/Internationalization';
 
 Chart.register(
   LineController,
@@ -33,11 +38,64 @@ Chart.register(
   Legend
 );
 
-export function Charts({ books }: { readonly books: RA<Book> }): JSX.Element {
+export type ParsedBook = Omit<Book, 'readTimes'> & {
+  readonly readTimes: RA<{
+    readonly start: Date | undefined;
+    readonly end: Date | undefined;
+  }>;
+};
+
+export function Charts({
+  books: rawBooks,
+}: {
+  readonly books: RA<Book>;
+}): JSX.Element {
+  const books = React.useMemo(
+    () =>
+      rawBooks.map((book) => ({
+        ...book,
+        readTimes: book.readTimes.map(({ start, end }) => ({
+          start: start === undefined ? undefined : new Date(start),
+          end: end === undefined ? undefined : new Date(end),
+        })),
+      })),
+    [rawBooks]
+  );
+  const years = React.useMemo(
+    () =>
+      Array.from(
+        new Set(
+          filterArray(
+            books.flatMap((book) =>
+              book.readTimes.flatMap(({ start, end }) => [
+                start?.getFullYear(),
+                end?.getFullYear(),
+              ])
+            )
+          )
+        )
+      ).sort(sortFunction(f.id)),
+    []
+  );
+  const [year, setYear] = React.useState<number | undefined>(years.at(-1));
   return (
     <div className="flex flex-col gap-8">
       <LineChart books={books} count="books" />
       <LineChart books={books} count="pages" />
+      <Label.Inline>
+        {commonText('year')}
+        <Select
+          value={year}
+          onValueChange={(year): void => setYear(f.parseInt(year))}
+        >
+          {years.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </Select>
+      </Label.Inline>
+      {typeof year === 'number' && <YearCharts books={books} year={year} />}
     </div>
   );
 }
@@ -46,9 +104,9 @@ function LineChart({
   books,
   count,
 }: {
-  readonly books: RA<Book>;
+  readonly books: RA<ParsedBook>;
   readonly count: 'books' | 'pages';
-}) {
+}): JSX.Element {
   const datasets = React.useMemo(() => getData(books, count), [books, count]);
   return (
     <Line
@@ -56,9 +114,7 @@ function LineChart({
       data={{
         datasets,
       }}
-      // FIXME: tooltips
       options={{
-        responsive: true,
         plugins: {
           title: {
             display: true,
@@ -68,6 +124,13 @@ function LineChart({
                 : commonText('pagesPerYear'),
           },
           legend: {},
+          tooltip: {
+            callbacks: {
+              label: (context): string =>
+                dateFormatter.format(new Date(context.raw.x)),
+              title: ([context]): string => context.dataset.label,
+            },
+          },
         },
         scales: {
           x: {
@@ -80,10 +143,6 @@ function LineChart({
             },
             title: {
               text: commonText('month'),
-            },
-            // FIXME: test which of these options are required
-            ticks: {
-              autoSkip: false,
             },
           },
           y: {
@@ -99,31 +158,22 @@ function LineChart({
 }
 
 /**
- * FIXME: all years line chart for book count/page count
  * FIXME: year selector
  * FIXME: single year horizontal stacked chart for book count/page count
- * FIXME: reading velocity
- * FIXME: properly interpret audiobooks page count
+ * FIXME: reading velocity (with option to exclude empty days)
+ * FIXME: average book length
  */
 
 function getData(
-  books: RA<Book>,
+  books: RA<ParsedBook>,
   type: 'books' | 'pages'
 ): RA<ChartDataset<'line', RA<{ readonly x: string; readonly y: number }>>> {
   const data: Record<number, R<number>> = {};
   books.forEach((book) =>
-    book.readTimes.forEach((readTime) => {
-      if (readTime.end === undefined) return;
-      const end = new Date(readTime.end);
+    book.readTimes.forEach(({ end }) => {
+      if (end === undefined) return;
       const year = end.getFullYear();
-      const month = (end.getMonth() + 1).toString().padStart(2, '0');
-      const day = end.getDate().toString().padStart(2, '0');
-      /*
-       * Using arbitrary leap year. Need to use the same year for all dates so
-       * that multiple datasets are properly overlapped on top of each other
-       */
-      const fakeYear = 1972;
-      const formatted = `${fakeYear}-${month}-${day}`;
+      const formatted = toFakeDate(end);
       data[year] ??= {};
       data[year][formatted] ??= 0;
       data[year][formatted] +=
@@ -151,4 +201,15 @@ function getData(
         ).dates
     ).map(([date, count]) => ({ x: date, y: count })),
   }));
+}
+
+export function toFakeDate(date: Date): string {
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  /*
+   * Using arbitrary leap year. Need to use the same year for all dates so
+   * that multiple datasets are properly overlapped on top of each other
+   */
+  const fakeYear = 1972;
+  return `${fakeYear}-${month}-${day}`;
 }

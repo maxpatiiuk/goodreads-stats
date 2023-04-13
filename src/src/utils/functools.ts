@@ -18,4 +18,5 @@ export const f = {
     const parsed = Number.parseInt(value);
     return Number.isNaN(parsed) ? undefined : parsed;
   },
+  id: <T>(a: T): T => a,
 } as const;
