@@ -3,6 +3,7 @@ import '../../css/foreground.css';
 import { commonText } from '../../localization/common';
 import { readPages } from './readPages';
 import { downloadFile } from '../Molecules/FilePicker';
+import { formatNumber } from '../Atoms/Internationalization';
 
 const footer = document.querySelector('#pagestuff .buttons') ?? undefined;
 if (footer === undefined) throw new Error('Unable to locate the page footer');
@@ -62,14 +63,20 @@ function displayDialog(total: number): {
   const progress = document.createElement('progress');
   progress.classList.add('w-full');
   progress.setAttribute('max', total.toString());
+  const progressText = document.createElement('p');
+  progressText.classList.add('text-center');
+  progressText.setAttribute('aria-hidden', true.toString());
 
-  function updateProgress(percentage: number): void {
-    progress.setAttribute('value', percentage.toString());
-    progress.textContent = `${percentage}%`;
+  function updateProgress(count: number): void {
+    progress.setAttribute('value', count.toString());
+    const formatted = `${formatNumber(count)}/${formatNumber(total)}`;
+    progress.textContent = formatted;
+    progressText.textContent = formatted;
   }
 
   updateProgress(0);
   dialog.append(progress);
+  dialog.append(progressText);
   dialog.showModal();
 
   const cleanup = (): void => void dialog.remove();

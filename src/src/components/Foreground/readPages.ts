@@ -226,7 +226,7 @@ async function fetchExtraDetails(book: BaseBook): Promise<ExtraDetails> {
         book.pageCount < maxAudioBookHours) &&
       typeof editionsUrl === 'string'
         ? await fetchPageCount(editionsUrl, book.pageCount)
-        : undefined,
+        : book.pageCount,
   };
 }
 

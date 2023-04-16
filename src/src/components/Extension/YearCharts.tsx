@@ -1,22 +1,24 @@
-import type { RA } from '../../utils/types';
-import type { ParsedBook } from './Charts';
-import { Bar } from 'react-chartjs-2';
-import { commonText } from '../../localization/common';
-import React from 'react';
 import {
-  Chart,
-  Colors,
   BarController,
   BarElement,
+  CategoryScale,
+  Chart,
+  Colors,
   PointElement,
   TimeScale,
   Title,
   Tooltip,
-  CategoryScale,
 } from 'chart.js';
+import React from 'react';
+import { Bar } from 'react-chartjs-2';
+
+import { commonText } from '../../localization/common';
+import type { IR, RA, WritableArray } from '../../utils/types';
+import { filterArray, writable } from '../../utils/types';
 import { sortFunction } from '../../utils/utils';
-import { filterArray } from '../../utils/types';
-import { toFakeDate } from './Charts';
+import { dateFormatter, formatNumber } from '../Atoms/Internationalization';
+import type { ParsedBook } from './Charts';
+import { fakeYear, toFakeDate } from './Charts';
 
 Chart.register(
   BarController,
@@ -29,29 +31,21 @@ Chart.register(
   Title
 );
 
+type IndexedBook = Omit<ParsedBook, 'readTimes'> & {
+  readonly readTime: ParsedBook['readTimes'][number];
+};
+
 export function YearCharts({
   year,
-  books: rawData,
+  books,
 }: {
   readonly year: number;
-  readonly books: RA<ParsedBook>;
+  readonly books: IR<RA<IndexedBook>>;
 }): JSX.Element {
-  const books = React.useMemo(
-    () =>
-      rawData
-        .map((book) => ({
-          ...book,
-          readTimes: book.readTimes.filter(
-            ({ end }) => end?.getFullYear() === year
-          ),
-        }))
-        .filter(({ readTimes }) => readTimes.length > 0),
-    [rawData, year]
-  );
   return (
     <>
-      <BarChart year={year} books={books} count="books" />
-      {/*<BarChart year={year} books={books} count="pages" />*/}
+      <BarChart books={books[year]} count="books" year={year} />
+      <BarChart books={books[year]} count="pages" year={year} />
     </>
   );
 }
@@ -62,11 +56,10 @@ function BarChart({
   count,
 }: {
   readonly year: number;
-  readonly books: RA<ParsedBook>;
+  readonly books: RA<IndexedBook>;
   readonly count: 'books' | 'pages';
 }): JSX.Element {
-  const min = new Date(year, 0, 1);
-  const { labels, data } = React.useMemo(
+  const { labels, tooltipTitles, tooltipLabels, data } = React.useMemo(
     () => getData(books, count, year),
     [books, year, count]
   );
@@ -74,7 +67,7 @@ function BarChart({
     <Bar
       className="flex-1"
       data={{
-        labels,
+        labels: writable(labels),
         datasets: [
           {
             label: year.toString(),
@@ -94,16 +87,17 @@ function BarChart({
           },
           tooltip: {
             callbacks: {
-              // label: (context): string =>
-              //   dateFormatter.format(new Date(context.raw.x)),
-              // title: ([context]): string => context.dataset.label,
+              title: ([{ dataIndex }]): string =>
+                tooltipTitles.at(-dataIndex) ?? dataIndex.toString(),
+              label: ({ dataIndex }): string =>
+                tooltipLabels.at(-dataIndex) ?? dataIndex.toString(),
             },
           },
         },
         scales: {
           x: {
-            min: '1972-01-01',
-            max: '1973-01-01',
+            min: `${fakeYear}-01-01`,
+            max: `${fakeYear + 1}-01-01`,
             type: 'time',
             time: {
               unit: 'month',
@@ -129,19 +123,25 @@ function BarChart({
 }
 
 function getData(
-  books: RA<ParsedBook>,
+  books: RA<IndexedBook>,
   count: 'books' | 'pages',
   year: number
 ): {
   readonly labels: RA<string>;
+  readonly tooltipLabels: RA<string>;
+  readonly tooltipTitles: RA<string>;
   readonly data: RA<readonly [string, string]>;
 } {
   const min = new Date(year, 0, 1);
   const max = new Date(year + 1, 0, 1);
   const data = Array.from(
     filterArray(
-      books.flatMap((book) =>
-        book.readTimes.map(({ start: rawStart, end = rawStart }) => {
+      books.map(
+        ({
+          title,
+          readTime: { start: rawStart, end = rawStart },
+          resolvedPageCount,
+        }) => {
           const start = rawStart ?? end;
           if (start === undefined || end === undefined) return undefined;
           const nextDayEnd = new Date(end);
@@ -150,11 +150,34 @@ function getData(
           const resolvedStart = start < min ? min : start;
           const resolvedEnd = nextDayEnd > max ? max : nextDayEnd;
 
-          return [toFakeDate(resolvedStart), toFakeDate(resolvedEnd)] as const;
-        })
+          return {
+            start: toFakeDate(resolvedStart),
+            end: toFakeDate(resolvedEnd),
+            label: `${dateFormatter.format(start)} - ${dateFormatter.format(
+              end
+            )}`,
+            pages: resolvedPageCount,
+            title,
+          };
+        }
       )
     )
-  ).sort(sortFunction(([start]) => start, true));
-  const labels = data.map((_, i) => (i + 1).toString()).reverse();
-  return { labels, data };
+  ).sort(sortFunction(({ start }) => start, true));
+  const labels =
+    count === 'books'
+      ? data.map((_, i) => (i + 1).toString()).reverse()
+      : data
+          .reduce<WritableArray<number>>((total, { pages: raw }) => {
+            const pages = typeof raw === 'number' ? raw : 1;
+            total.push((total.at(-1) ?? 0) + pages);
+            return total;
+          }, [])
+          .map(formatNumber)
+          .reverse();
+  return {
+    labels,
+    data: data.map(({ start, end }) => [start, end] as const),
+    tooltipTitles: data.map(({ title }) => title),
+    tooltipLabels: data.map(({ label }) => label),
+  };
 }

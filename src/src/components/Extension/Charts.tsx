@@ -20,7 +20,7 @@ import { commonText } from '../../localization/common';
 import { f } from '../../utils/functools';
 import type { R, RA } from '../../utils/types';
 import { filterArray } from '../../utils/types';
-import { sortFunction } from '../../utils/utils';
+import { group, sortFunction } from '../../utils/utils';
 import { Label, Select } from '../Atoms';
 import type { Book } from '../Foreground/readPages';
 import { YearCharts } from './YearCharts';
@@ -61,21 +61,32 @@ export function Charts({
       })),
     [rawBooks]
   );
-  const years = React.useMemo(
+  const indexedBooks = React.useMemo(
     () =>
-      Array.from(
-        new Set(
-          filterArray(
-            books.flatMap((book) =>
-              book.readTimes.flatMap(({ start, end }) => [
-                start?.getFullYear(),
-                end?.getFullYear(),
-              ])
+      Object.fromEntries(
+        group(
+          books.flatMap(({ readTimes, ...book }) =>
+            filterArray(
+              readTimes.map((readTime) =>
+                readTime.end === undefined
+                  ? undefined
+                  : ([
+                      readTime.end?.getFullYear(),
+                      {
+                        ...book,
+                        readTime,
+                      },
+                    ] as const)
+              )
             )
           )
         )
-      ).sort(sortFunction(f.id)),
-    []
+      ),
+    [books]
+  );
+  const years = React.useMemo(
+    () => Array.from(Object.keys(indexedBooks)).sort(sortFunction(f.id)),
+    [indexedBooks]
   );
   const [year, setYear] = React.useState<number | undefined>(years.at(-1));
   return (
@@ -95,7 +106,9 @@ export function Charts({
           ))}
         </Select>
       </Label.Inline>
-      {typeof year === 'number' && <YearCharts books={books} year={year} />}
+      {typeof year === 'number' && (
+        <YearCharts books={indexedBooks} year={year} />
+      )}
     </div>
   );
 }
@@ -203,6 +216,8 @@ function getData(
   }));
 }
 
+export const fakeYear = 1972;
+
 export function toFakeDate(date: Date): string {
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
@@ -210,6 +225,5 @@ export function toFakeDate(date: Date): string {
    * Using arbitrary leap year. Need to use the same year for all dates so
    * that multiple datasets are properly overlapped on top of each other
    */
-  const fakeYear = 1972;
   return `${fakeYear}-${month}-${day}`;
 }
