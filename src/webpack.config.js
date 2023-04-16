@@ -12,7 +12,7 @@ module.exports = (_env, argv) =>
     module: {
       rules: [
         {
-          test: /\.(png|gif|jpg|jpeg|svg)$/,
+          test: /\.(png|gif|jpg|jpeg|svg|woff|woff2|eot|ttf)$/,
           type: 'asset',
         },
         {
@@ -81,7 +81,6 @@ module.exports = (_env, argv) =>
     output: {
       path: outputPath,
       clean: true,
-      publicPath: '/public/',
       filename: '[name].bundle.js',
       environment: {
         arrowFunction: true,
