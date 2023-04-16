@@ -65,8 +65,6 @@ export const columns: RR<
     renderer: ({ description }) => (
       <p dangerouslySetInnerHTML={{ __html: description }} />
     ),
-    // FIXME: does not remember visible columns
-    // FIXME: checking column does not show that
   },
   pageCount: {
     header: commonText('originalPageCount'),

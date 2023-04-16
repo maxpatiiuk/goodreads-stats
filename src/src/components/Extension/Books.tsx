@@ -39,11 +39,12 @@ export function Books({
     () => throttle(setState, throttleRate),
     [setState]
   );
-  const visibleColumns = React.useState(defaultVisible);
+  const [visibleColumns = defaultVisible, setVisibleColumns] =
+    useStorage('visibleColumns');
   return (
     <DataTable
       className="!h-0 flex-1"
-      customRestoreState={() => state}
+      customRestoreState={(): object | undefined => state}
       customSaveState={throttledSet}
       dataKey="id"
       emptyMessage={commonText('noBooksFound')}
@@ -53,7 +54,9 @@ export function Books({
         <div className="flex gap-2">
           {header}
           <span className="-ml-2 flex-1" />
-          <VisibleColumns visibleColumns={visibleColumns} />
+          <VisibleColumns
+            visibleColumns={[visibleColumns, setVisibleColumns]}
+          />
         </div>
       }
       multiSortMeta={standalone ? writable(defaultSort) : undefined}
@@ -68,7 +71,7 @@ export function Books({
       value={writable(books)}
     >
       {Object.entries(columns).map(([key, config]) =>
-        config !== undefined && visibleColumns[0].includes(key) ? (
+        config !== undefined && visibleColumns.includes(key) ? (
           <Column
             body={config.renderer}
             dataType={
@@ -109,7 +112,7 @@ function VisibleColumns({
             config === undefined ? undefined : (
               <Label.Inline key={header}>
                 <Input.Checkbox
-                  checked={f.includes(visibleColumns, config)}
+                  checked={f.includes(visibleColumns, header)}
                   onValueChange={(isChecked): void =>
                     setVisibleColumns(
                       isChecked

@@ -1,6 +1,7 @@
 import React from 'react';
 
-import type { GetSet, IR, R } from '../utils/types';
+import type { Book } from '../components/Foreground/readPages';
+import type { GetSet, IR, R, RA } from '../utils/types';
 import { ensure, setDevelopmentGlobal } from '../utils/types';
 import { useAsyncState } from './useAsyncState';
 
@@ -11,8 +12,12 @@ type StorageItem<T> = {
 
 export const storageDefinitions = ensure<IR<StorageItem<unknown>>>()({
   primeVue: {
-    type: 'local' as 'local' | 'sync',
+    type: 'local',
     defaultValue: undefined as unknown as object,
+  },
+  visibleColumns: {
+    type: 'sync',
+    defaultValue: undefined as RA<keyof Book> | undefined,
   },
 } as const);
 
