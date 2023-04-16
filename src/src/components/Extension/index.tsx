@@ -1,13 +1,15 @@
 import '../../css/extension.css';
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { App } from './App';
 import { ErrorBoundary } from '../Errors/ErrorBoundary';
+import { App } from './App';
 
-// TODO: publish to webstore and post link here
-// TODO: add screenshots
-// TODO: remove unused code
+/*
+ * TODO: publish to webstore and post link in README.md
+ * TODO: add screenshots
+ */
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(

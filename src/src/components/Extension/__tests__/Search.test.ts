@@ -139,7 +139,7 @@ const searchQueries = [
   'carbon to-read',
 ];
 describe('filterBooks', () =>
-  searchQueries.forEach((query) =>
+  void searchQueries.forEach((query) =>
     test(query, () =>
       expect(
         filterBooks(allBooks, indexed, query)

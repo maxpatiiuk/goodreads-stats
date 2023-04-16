@@ -1,9 +1,9 @@
 import '../../css/foreground.css';
 
 import { commonText } from '../../localization/common';
-import { readPages } from './readPages';
-import { downloadFile } from '../Molecules/FilePicker';
 import { formatNumber } from '../Atoms/Internationalization';
+import { downloadFile } from '../Molecules/FilePicker';
+import { readPages } from './readPages';
 
 const footer = document.querySelector('#pagestuff .buttons') ?? undefined;
 if (footer === undefined) throw new Error('Unable to locate the page footer');
@@ -40,7 +40,7 @@ function getTotal(): number {
     typeof shelfName === 'string'
       ? shelfName.slice(shelfName.lastIndexOf('(')).replaceAll(/\D+/gu, '')
       : '';
-  const number = Number.parseInt(trimmed, 10);
+  const number = Number.parseInt(trimmed);
   if (Number.isNaN(number))
     console.error('Unable to locate the total number of books on a shelf');
   const fallbackTotal = 1000;
@@ -79,7 +79,7 @@ function displayDialog(total: number): {
   dialog.append(progressText);
   dialog.showModal();
 
-  const cleanup = (): void => void dialog.remove();
+  const cleanup = (): void => dialog.remove();
 
   return { cleanup, updateProgress };
 }

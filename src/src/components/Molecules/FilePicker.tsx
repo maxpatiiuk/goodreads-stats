@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { useBooleanState } from '../../hooks/useBooleanState';
+import { commonText } from '../../localization/common';
 import type { RA } from '../../utils/types';
 import { className } from '../Atoms';
-import { commonText } from '../../localization/common';
 
 export function FilePicker({
   onSelected: handleSelected,

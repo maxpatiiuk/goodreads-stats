@@ -7,8 +7,8 @@ import type { Takeout } from '../Foreground/readPages';
 import { DateElement } from '../Molecules/DateElement';
 import { FilePicker, fileToText } from '../Molecules/FilePicker';
 import { Books } from './Books';
-import { Search } from './Search';
 import { Charts } from './Charts';
+import { Search } from './Search';
 
 export function App(): JSX.Element | null {
   const [data, setData] = React.useState<Takeout | string | undefined>(

@@ -1,49 +1,6 @@
 import { mockTime } from '../../../tests/helpers';
 import { theories } from '../../../tests/utils';
-import {
-  compareStrings,
-  dateParts,
-  formatList,
-  formatNumber,
-  getRelativeDate,
-  months,
-} from '../Internationalization';
-
-test('months names are localized', () => {
-  expect(months).toEqual([
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ]);
-});
-
-theories(formatList, [
-  { in: [[]], out: '' },
-  { in: [['a']], out: 'a' },
-  { in: [['a', 'b']], out: 'a and b' },
-  { in: [['a', 'b', 'c']], out: 'a, b, and c' },
-]);
-
-describe('dateLocalizer', () => {
-  test('day', () => {
-    expect(dateParts.day).toBe('Day');
-  });
-  test('month', () => {
-    expect(dateParts.month).toBe('Month');
-  });
-  test('year', () => {
-    expect(dateParts.year).toBe('Year');
-  });
-});
+import { formatNumber, getRelativeDate } from '../Internationalization';
 
 theories(formatNumber, {
   '0': { in: [0], out: '0' },
@@ -109,9 +66,4 @@ describe('getRelativeDate', () => {
 
     expect(getRelativeDate(date)).toBe('3 years ago');
   });
-});
-
-theories(compareStrings, {
-  'ç and Ç': { in: ['ç', 'Ç'], out: 0 },
-  '## and $$': { in: ['##', '$$'], out: -1 },
 });

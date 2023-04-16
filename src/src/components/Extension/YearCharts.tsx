@@ -16,7 +16,8 @@ import type { IR, RA, WritableArray } from '../../utils/types';
 import { filterArray, writable } from '../../utils/types';
 import { sortFunction } from '../../utils/utils';
 import { dateFormatter, formatNumber } from '../Atoms/Internationalization';
-import { fakeYear, IndexedBook, toFakeDate } from './Charts';
+import type { IndexedBook } from './Charts';
+import { fakeYear, toFakeDate } from './Charts';
 
 Chart.register(
   BarController,

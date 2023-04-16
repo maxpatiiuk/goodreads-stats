@@ -6,9 +6,19 @@ describe('f.includes', () => {
   test('empty case', () => expect(f.includes([], 1)).toBe(false));
 });
 
-describe('f.unique', () => {
-  test('empty case', () => expect(f.unique([])).toEqual([]));
-  test('unique case', () => expect(f.unique([1, 2, 3])).toEqual([1, 2, 3]));
-  test('duplicate case', () =>
-    expect(f.unique([1, 2, 3, 1])).toEqual([1, 2, 3]));
+describe('f.parseInt', () => {
+  test('simple case', () => expect(f.parseInt('1')).toBe(1));
+  test('float case', () => expect(f.parseInt('-1.4')).toBe(-1));
+  test('invalid case', () => expect(f.parseInt('a-1.4')).toBeUndefined());
+});
+
+describe('f.parseFloat', () => {
+  test('simple case', () => expect(f.parseFloat('1')).toBe(1));
+  test('float case', () => expect(f.parseFloat('-1.4')).toBe(-1.4));
+  test('invalid case', () => expect(f.parseFloat('a-1.4')).toBeUndefined());
+});
+
+test('f.id returns the value it was passed', () => {
+  const id = {};
+  expect(f.id(id)).toBe(id);
 });

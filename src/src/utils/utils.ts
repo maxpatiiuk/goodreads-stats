@@ -3,8 +3,7 @@
  *
  * @module
  */
-import { f } from './functools';
-import type { IR, RA, RR } from './types';
+import type { RA, RR } from './types';
 
 export const capitalize = <T extends string>(string: T): Capitalize<T> =>
   (string.charAt(0).toUpperCase() + string.slice(1)) as Capitalize<T>;
@@ -32,31 +31,6 @@ export const sortFunction =
     return (leftValue ?? '') > (rightValue ?? '') ? 1 : -1;
   };
 
-/** Split array in half according to a discriminator function */
-export const split = <LEFT_ITEM, RIGHT_ITEM = LEFT_ITEM>(
-  array: RA<LEFT_ITEM | RIGHT_ITEM>,
-  // If returns true, item would go to the right array
-  discriminator: (
-    item: LEFT_ITEM | RIGHT_ITEM,
-    index: number,
-    array: RA<LEFT_ITEM | RIGHT_ITEM>
-  ) => boolean
-): readonly [left: RA<LEFT_ITEM>, right: RA<RIGHT_ITEM>] =>
-  array
-    .map((item, index) => [item, discriminator(item, index, array)] as const)
-    .reduce<
-      readonly [
-        left: RA<LEFT_ITEM | RIGHT_ITEM>,
-        right: RA<LEFT_ITEM | RIGHT_ITEM>
-      ]
-    >(
-      ([left, right], [item, isRight]) => [
-        [...left, ...(isRight ? [] : [item])],
-        [...right, ...(isRight ? [item] : [])],
-      ],
-      [[], []]
-    ) as readonly [left: RA<LEFT_ITEM>, right: RA<RIGHT_ITEM>];
-
 /** Remove item from array if present, otherwise, add it */
 export const toggleItem = <T>(array: RA<T>, item: T): RA<T> =>
   array.includes(item)
@@ -72,50 +46,6 @@ export const replaceItem = <T>(array: RA<T>, index: number, item: T): RA<T> =>
         item,
         ...(index === -1 ? [] : array.slice(index + 1)),
       ];
-
-/** Creates a new object with a given key replaced */
-export const replaceKey = <T extends IR<unknown>>(
-  object: T,
-  targetKey: keyof T,
-  newValue: T[keyof T]
-): T =>
-  object[targetKey] === newValue
-    ? object
-    : {
-        // Despite what it looks like, this would preserve the order of keys
-        ...object,
-        [targetKey]: newValue,
-      };
-
-/** Create a new array without a given item */
-export const removeItem = <T>(array: RA<T>, index: number): RA<T> =>
-  index < 0
-    ? [...array.slice(0, index - 1), ...array.slice(index)]
-    : [...array.slice(0, index), ...array.slice(index + 1)];
-
-/**
- * Create a new object with given keys removed
- */
-export const removeKey = <
-  DICTIONARY extends IR<unknown>,
-  OMIT extends keyof DICTIONARY
->(
-  object: DICTIONARY,
-  ...toOmit: RA<OMIT>
-): Omit<DICTIONARY, OMIT> =>
-  // @ts-expect-error
-  Object.fromEntries(
-    Object.entries(object).filter(([key]) => !f.includes(toOmit, key))
-  );
-
-export function findLastIndex<T>(
-  array: RA<T>,
-  mapping: (item: T, index: number) => boolean
-): number {
-  for (let index = array.length - 1; index >= 0; index -= 1)
-    if (mapping(array[index], index)) return index;
-  return -1;
-}
 
 /**
  * Convert an array of [key,value] tuples to a RA<[key, RA<value>]>

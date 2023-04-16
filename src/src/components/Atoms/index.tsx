@@ -2,11 +2,7 @@ import React from 'react';
 
 import type { IconProps } from './Icon';
 import { icons } from './Icon';
-import type { TagProps } from './wrapper';
 import { wrap } from './wrapper';
-
-export const H2 = wrap('H2', 'h2', 'm-0 flex items-center gap-2');
-export const H3 = wrap('H3', 'h3', 'm-0 flex items-center gap-2');
 
 /**
  * Make button match Google Calendar's styling
@@ -41,14 +37,6 @@ export const className = {
 
 export const Button = {
   Primary: button('Button.Primary', className.buttonPrimary),
-  Info: button(
-    'Button.Info',
-    `border-blue-600 bg-blue-600 hover:bg-blue-700 active:bg-blue-500 text-white`
-  ),
-  Danger: button(
-    'Button.Danger',
-    `border-red-600 bg-red-600 hover:bg-red-700 active:bg-red-500 text-white`
-  ),
   Icon: wrap<
     'button',
     IconProps & {
@@ -85,43 +73,6 @@ export const ErrorMessage = wrap(
 );
 
 export const Input = {
-  Number({
-    isReadOnly,
-    className: classList,
-    value,
-    onValueChange: handleValueChange,
-    width = 'w-full',
-    ...props
-  }: Omit<TagProps<'input'>, 'children' | 'readOnly' | 'type'> & {
-    readonly isReadOnly?: boolean;
-    readonly onValueChange?: (value: number) => void;
-    readonly width?: string;
-  }): JSX.Element {
-    const [hasValue, setHasValue] = React.useState(true);
-    React.useEffect(() => setHasValue(true), [value]);
-    return (
-      <input
-        {...props}
-        className={`${width} ${className.googleButton} ${classList ?? ''}`}
-        readOnly={isReadOnly}
-        type="number"
-        value={hasValue ? value : ''}
-        onChange={(event): void => {
-          const rawHumber = Number.parseInt(
-            (event.target as HTMLInputElement).value
-          );
-          const number = Number.isNaN(rawHumber) ? undefined : rawHumber;
-          if (number === undefined) setHasValue(false);
-          else {
-            if (!hasValue) setHasValue(true);
-            handleValueChange?.(number);
-          }
-
-          props.onChange?.(event);
-        }}
-      />
-    );
-  },
   Checkbox: wrap<
     'input',
     {

@@ -80,7 +80,7 @@ function index(allBooks: RA<Book>): Index {
   );
 
   // Build an index and normalize it
-  const weights = tokens.map((columns, bookIndex) => {
+  const weights = tokens.map((columns) => {
     const index: R<Record<keyof typeof searchConfig, number>> = {};
     columns.forEach(({ column, tokens }) =>
       Object.entries(count(tokens)).forEach(([token, termCount]) => {

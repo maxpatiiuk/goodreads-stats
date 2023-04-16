@@ -18,8 +18,8 @@ const linkComponent = <EXTRA_PROPS extends IR<unknown> = RR<never, never>>(
       readonly href: string;
       readonly children?:
         | JSX.Element
-        | string
-        | RA<JSX.Element | string | false | undefined>;
+        | RA<JSX.Element | string | false | undefined>
+        | string;
       readonly title?: string | undefined;
       readonly 'aria-label'?: string | undefined;
     }

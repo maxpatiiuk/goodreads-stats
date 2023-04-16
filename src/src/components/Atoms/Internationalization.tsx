@@ -2,43 +2,12 @@
  * Various tools to help internationalize the application
  */
 
-import { commonText } from '../../localization/common';
 import { LANGUAGE } from '../../localization/utils';
 import type { RA } from '../../utils/types';
-import { capitalize } from '../../utils/utils';
 
 /* This is an incomplete definition. For complete, see MDN Docs */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace Intl {
-  class ListFormat {
-    public constructor(
-      locales?: RA<string> | string,
-      options?: {
-        readonly type?: 'conjunction' | 'disjunction';
-        readonly style?: 'long' | 'narrow' | 'short';
-      }
-    );
-
-    public format(values: RA<string>): string;
-  }
-
-  class DisplayNames {
-    public constructor(
-      locales?: RA<string> | string,
-      options?: {
-        readonly type:
-          | 'calendar'
-          | 'currency'
-          | 'dateTimeField'
-          | 'language'
-          | 'region'
-          | 'script';
-      }
-    );
-
-    public of(code: string): string;
-  }
-
   class NumberFormat {
     public constructor(locales?: RA<string> | string);
 
@@ -74,50 +43,12 @@ declare namespace Intl {
 
     public format(value: Readonly<Date>): string;
   }
-
-  class Collator {
-    public constructor(
-      locales?: RA<string> | string,
-      options?: {
-        readonly sensitivity?: 'accent' | 'base' | 'case' | 'variant';
-        readonly caseFirst?: 'lower' | 'upper' | false;
-        readonly ignorePunctuation?: boolean;
-      }
-    );
-
-    public compare(left: string, right: string): -1 | 0 | 1;
-  }
 }
-
-function getMonthNames(monthFormat: 'long' | 'short'): RA<string> {
-  const months = new Intl.DateTimeFormat(LANGUAGE, { month: monthFormat });
-  return Array.from({ length: 12 }, (_, month) =>
-    months.format(new Date(0, month, 2, 0, 0, 0))
-  );
-}
-export const months = getMonthNames('long');
 
 export const dateFormatter = new Intl.DateTimeFormat(LANGUAGE, {
   month: 'long',
   day: 'numeric',
 });
-
-const listFormatter = new Intl.ListFormat(LANGUAGE, {
-  style: 'long',
-  type: 'conjunction',
-});
-export const formatList = (list: RA<string>): string =>
-  listFormatter.format(list);
-
-const datePartLocalizer = new Intl.DisplayNames(LANGUAGE, {
-  type: 'dateTimeField',
-});
-export const dateParts = {
-  fullDate: commonText('fullDate'),
-  day: capitalize(datePartLocalizer.of('day')),
-  month: capitalize(datePartLocalizer.of('month')),
-  year: capitalize(datePartLocalizer.of('year')),
-} as const;
 
 const numberFormatter = new Intl.NumberFormat(LANGUAGE);
 export const formatNumber = (number: number): string =>
@@ -169,32 +100,3 @@ export function getRelativeDate(date: Readonly<Date>): string {
     return relativeDate.format(-Math.round(timePassed / MONTH), 'month');
   else return relativeDate.format(-Math.round(timePassed / YEAR), 'year');
 }
-
-const dateFormatters = {
-  day: new Intl.DateTimeFormat(LANGUAGE, { dateStyle: 'full' }),
-  week: new Intl.DateTimeFormat(LANGUAGE, { weekday: 'long', day: 'numeric' }),
-  month: new Intl.DateTimeFormat(LANGUAGE, { day: 'numeric' }),
-  year: new Intl.DateTimeFormat(LANGUAGE, { month: 'long' }),
-  customday: new Intl.DateTimeFormat(LANGUAGE, {
-    weekday: 'long',
-    day: 'numeric',
-  }),
-  customweek: new Intl.DateTimeFormat(LANGUAGE, {
-    day: 'numeric',
-  }),
-} as const;
-
-export const formatDateLabel = (
-  date: Date,
-  view: keyof typeof dateFormatters
-): string => dateFormatters[view].format(date);
-
-// eslint-disable-next-line @typescript-eslint/unbound-method
-export const compareStrings = new Intl.Collator(
-  globalThis.navigator?.language ?? 'en-us',
-  {
-    sensitivity: 'base',
-    caseFirst: 'upper',
-    ignorePunctuation: true,
-  }
-).compare;

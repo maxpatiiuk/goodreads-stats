@@ -1,15 +1,10 @@
 import {
   camelToHuman,
   capitalize,
-  findLastIndex,
   group,
   mappedFind,
-  removeItem,
-  removeKey,
   replaceItem,
-  replaceKey,
   sortFunction,
-  split,
   toggleItem,
 } from '../utils';
 import { theories } from '../../tests/utils';
@@ -53,16 +48,6 @@ describe('sortFunction', () => {
   });
 });
 
-theories(split, [
-  {
-    in: [[1, 2, 3, 4, 5, 6, 7, 8], (value: number) => value % 2 === 0],
-    out: [
-      [1, 3, 5, 7],
-      [2, 4, 6, 8],
-    ],
-  },
-]);
-
 theories(toggleItem, {
   'add an item that is not present': { in: [[1, 2, 3], 4], out: [1, 2, 3, 4] },
   'remove an item that is present': { in: [[1, 2, 3, 4], 4], out: [1, 2, 3] },
@@ -76,51 +61,6 @@ theories(replaceItem, {
   'replace from the end': { in: [[1, 2, 3, 0], -1, 4], out: [1, 2, 3, 4] },
   'replace after the end': { in: [[1, 2, 3], 99, 4], out: [1, 2, 3, 4] },
 });
-
-theories(replaceKey, {
-  'replacing existing key': {
-    in: [{ a: 'a', b: 'b' }, 'a', 'c'],
-    out: {
-      a: 'c',
-      b: 'b',
-    },
-  },
-  'replacing non-existed key': {
-    in: [{ a: 'a', b: 'b' }, 'c' as 'a', 'c'],
-    out: {
-      a: 'a',
-      b: 'b',
-      c: 'c',
-    },
-  },
-});
-
-theories(removeItem, {
-  'remove from the beginning': { in: [[0, 1, 2, 3, 4], 0], out: [1, 2, 3, 4] },
-  'remove in the middle': { in: [[1, 0, 2, 3, 4], 1], out: [1, 2, 3, 4] },
-  'remove at the end': { in: [[1, 2, 3, 4, 0], 4], out: [1, 2, 3, 4] },
-  'remove from the end': { in: [[1, 2, 3, 0, 4], -1], out: [1, 2, 3, 4] },
-  'remove after the end': { in: [[1, 2, 3, 4], 99], out: [1, 2, 3, 4] },
-});
-
-theories(removeKey, {
-  'removing a key that is present': [[{ a: 'b', c: 'd' }, 'c'], { a: 'b' }],
-  'removing a key that is not present': [[{ a: 'b' }, 'c' as 'a'], { a: 'b' }],
-});
-
-theories(findLastIndex, [
-  {
-    in: [[1, 2, 3, 4, 5, 6, 7, 8], (value: number) => value % 2 === 1],
-    out: 6,
-  },
-  {
-    in: [
-      [1, 2, 3, 4, 5, 6, 7, 8],
-      (_value: number, index: number) => index === 4,
-    ],
-    out: 4,
-  },
-]);
 
 theories(group, [
   {

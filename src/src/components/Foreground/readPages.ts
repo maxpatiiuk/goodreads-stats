@@ -109,7 +109,7 @@ const parseItem = (element: Element): BaseBook =>
       if (content === undefined)
         console.warn(`Unable to find ${selector}`, content);
       const value = f.includes(numericColumns, key)
-        ? (f.parseInt(content ?? '') as string | undefined) ?? content
+        ? (f.parseFloat(content ?? '') as string | undefined) ?? content
         : content;
       return [key, value ?? ''] as const;
     })
@@ -135,7 +135,7 @@ type BaseBook = {
   readonly description: string;
   readonly pageCount: number | string;
   readonly authorName: string;
-  readonly userRating: string;
+  readonly userRating: number | string;
   readonly userDateAdded: string;
   readonly userShelves: string;
   readonly userReview: string;

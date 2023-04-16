@@ -1,4 +1,4 @@
-import { IR } from './types';
+import type { IR } from './types';
 
 export function formatUrl(url: string, parameters: IR<string>): string {
   const urlObject = new URL(url, getUrl());
