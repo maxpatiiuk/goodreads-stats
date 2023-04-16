@@ -58,14 +58,14 @@ function Dashboard({ takeout }: { readonly takeout: Takeout }): JSX.Element {
         <DateElement date={takeout.lastBuildDate} />
       </p>
       <TabView className="contents" panelContainerClassName="contents">
+        <TabPanel className="contents" header={commonText('stats')}>
+          <Charts books={takeout.books} />
+        </TabPanel>
         <TabPanel className="contents" header={commonText('allBooks')}>
           <Books books={takeout.books} header={header} standalone />
         </TabPanel>
         <TabPanel className="contents" header={commonText('search')}>
           <Search books={takeout.books} header={header} />
-        </TabPanel>
-        <TabPanel className="contents" header={commonText('stats')}>
-          <Charts books={takeout.books} />
         </TabPanel>
       </TabView>
     </>

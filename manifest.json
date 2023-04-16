@@ -6,10 +6,11 @@
   "author": "Max Patiiuk",
   "manifest_version": 3,
   "icons": {
-    "16": "./src/public/images/extension_icon_16x16.png",
-    "32": "./src/public/images/extension_icon_32x32.png",
-    "48": "./src/public/images/extension_icon_48x48.png",
-    "128": "./src/public/images/extension_icon_128x128.png"
+    "16": "./src/public/images/favicon-16x16.png",
+    "32": "./src/public/images/favicon-32x32.png",
+    "48": "./src/public/images/favicon-48x48.png",
+    "128": "./src/public/images/favicon-128x128.png",
+    "1024": "./src/public/images/favicon-1024x1024.png"
   },
   "action": {
     "default_title": "Get insights about your reading habits"
