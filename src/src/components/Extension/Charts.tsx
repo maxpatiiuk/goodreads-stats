@@ -19,12 +19,13 @@ import { Line } from 'react-chartjs-2';
 import { commonText } from '../../localization/common';
 import { f } from '../../utils/functools';
 import type { R, RA } from '../../utils/types';
-import { filterArray } from '../../utils/types';
+import { filterArray, writable } from '../../utils/types';
 import { group, sortFunction } from '../../utils/utils';
 import { Label, Select } from '../Atoms';
-import type { Book } from '../Foreground/readPages';
-import { YearCharts } from './YearCharts';
 import { dateFormatter } from '../Atoms/Internationalization';
+import type { Book } from '../Foreground/readPages';
+import { ReadingRate } from './ReadingRate';
+import { YearCharts } from './YearCharts';
 
 Chart.register(
   LineController,
@@ -33,16 +34,21 @@ Chart.register(
   TimeScale,
   PointElement,
   LineElement,
-  Colors,
   Title,
-  Legend
+  Legend,
+  // @ts-expect-error Seems to be a typing mistake in the library
+  Colors
 );
 
-export type ParsedBook = Omit<Book, 'readTimes'> & {
+type ParsedBook = Omit<Book, 'readTimes'> & {
   readonly readTimes: RA<{
     readonly start: Date | undefined;
     readonly end: Date | undefined;
   }>;
+};
+
+export type IndexedBook = Omit<ParsedBook, 'readTimes'> & {
+  readonly readTime: ParsedBook['readTimes'][number];
 };
 
 export function Charts({
@@ -64,31 +70,32 @@ export function Charts({
   const indexedBooks = React.useMemo(
     () =>
       Object.fromEntries(
-        group(
-          books.flatMap(({ readTimes, ...book }) =>
-            filterArray(
-              readTimes.map((readTime) =>
-                readTime.end === undefined
-                  ? undefined
-                  : ([
-                      readTime.end?.getFullYear(),
-                      {
-                        ...book,
-                        readTime,
-                      },
-                    ] as const)
+        Array.from(
+          group(
+            books.flatMap(({ readTimes, ...book }) =>
+              filterArray(
+                readTimes.map((readTime) =>
+                  readTime.end === undefined
+                    ? undefined
+                    : ([
+                        readTime.end?.getFullYear(),
+                        {
+                          ...book,
+                          readTime,
+                        },
+                      ] as const)
+                )
               )
             )
           )
-        )
+        ).sort(([year]) => year)
       ),
     [books]
   );
-  const years = React.useMemo(
-    () => Array.from(Object.keys(indexedBooks)).sort(sortFunction(f.id)),
-    [indexedBooks]
+  const years = Object.keys(indexedBooks);
+  const [year, setYear] = React.useState<number | undefined>(
+    f.parseInt(years.at(-1) ?? '')
   );
-  const [year, setYear] = React.useState<number | undefined>(years.at(-1));
   return (
     <div className="flex flex-col gap-8">
       <LineChart books={books} count="books" />
@@ -106,6 +113,7 @@ export function Charts({
           ))}
         </Select>
       </Label.Inline>
+      <ReadingRate books={indexedBooks} />
       {typeof year === 'number' && (
         <YearCharts books={indexedBooks} year={year} />
       )}
@@ -125,7 +133,7 @@ function LineChart({
     <Line
       className="flex-1"
       data={{
-        datasets,
+        datasets: writable(datasets),
       }}
       options={{
         plugins: {
@@ -140,8 +148,10 @@ function LineChart({
           tooltip: {
             callbacks: {
               label: (context): string =>
-                dateFormatter.format(new Date(context.raw.x)),
-              title: ([context]): string => context.dataset.label,
+                dateFormatter.format(
+                  new Date((context.raw as { readonly x: string }).x)
+                ),
+              title: ([context]): string => context.dataset.label ?? '',
             },
           },
         },
@@ -169,13 +179,6 @@ function LineChart({
     />
   );
 }
-
-/**
- * FIXME: year selector
- * FIXME: single year horizontal stacked chart for book count/page count
- * FIXME: reading velocity (with option to exclude empty days)
- * FIXME: average book length
- */
 
 function getData(
   books: RA<ParsedBook>,

@@ -2,7 +2,6 @@ import { createDictionary } from './utils';
 
 // Refer to "Guidelines for Programmers" in ./README.md before editing this file
 
-/* eslint-disable @typescript-eslint/naming-convention */
 export const commonText = createDictionary({
   goodreadsStats: { 'en-us': 'Goodreads Stats' },
   goodreadsStatsDescription: {
@@ -113,5 +112,31 @@ export const commonText = createDictionary({
   year: {
     'en-us': 'Year',
   },
+  booksPerDay: {
+    'en-us': 'Books per day',
+  },
+  pagesPerDay: {
+    'en-us': 'Pages per day',
+  },
+  booksPerDayFiltered: {
+    'en-us': 'Books per day (excluding blank days)',
+  },
+  pagesPerDayFiltered: {
+    'en-us': 'Pages per day (excluding blank days)',
+  },
+  averageBookLength: {
+    'en-us': 'Average book length',
+  },
+  longestBook: {
+    'en-us': 'Longest book',
+  },
+  shortestBook: {
+    'en-us': 'Shortest book',
+  },
+  expand: {
+    'en-us': 'Expand',
+  },
+  collapse: {
+    'en-us': 'Collapse',
+  },
 });
-/* eslint-enable @typescript-eslint/naming-convention */

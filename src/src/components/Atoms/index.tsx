@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { IconProps } from './Icon';
+import { icons } from './Icon';
 import type { TagProps } from './wrapper';
 import { wrap } from './wrapper';
 
@@ -47,6 +49,19 @@ export const Button = {
     'Button.Danger',
     `border-red-600 bg-red-600 hover:bg-red-700 active:bg-red-500 text-white`
   ),
+  Icon: wrap<
+    'button',
+    IconProps & {
+      readonly onClick:
+        | ((event: React.MouseEvent<HTMLButtonElement>) => void)
+        | undefined;
+    }
+  >('Button.Icon', 'button', `icon link rounded`, ({ icon, ...props }) => ({
+    ...props,
+    'aria-label': props['aria-label'] ?? props.title,
+    type: 'button',
+    children: icons[icon],
+  })),
 };
 
 export const Ul = wrap('Ul', 'ul', 'flex flex-col gap-2', { role: 'list' });

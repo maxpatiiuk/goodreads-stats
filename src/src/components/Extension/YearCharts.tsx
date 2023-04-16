@@ -3,7 +3,6 @@ import {
   BarElement,
   CategoryScale,
   Chart,
-  Colors,
   PointElement,
   TimeScale,
   Title,
@@ -17,8 +16,7 @@ import type { IR, RA, WritableArray } from '../../utils/types';
 import { filterArray, writable } from '../../utils/types';
 import { sortFunction } from '../../utils/utils';
 import { dateFormatter, formatNumber } from '../Atoms/Internationalization';
-import type { ParsedBook } from './Charts';
-import { fakeYear, toFakeDate } from './Charts';
+import { fakeYear, IndexedBook, toFakeDate } from './Charts';
 
 Chart.register(
   BarController,
@@ -27,13 +25,8 @@ Chart.register(
   CategoryScale,
   TimeScale,
   PointElement,
-  Colors,
   Title
 );
-
-type IndexedBook = Omit<ParsedBook, 'readTimes'> & {
-  readonly readTime: ParsedBook['readTimes'][number];
-};
 
 export function YearCharts({
   year,
