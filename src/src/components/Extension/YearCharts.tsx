@@ -82,9 +82,9 @@ function BarChart({
           tooltip: {
             callbacks: {
               title: ([{ dataIndex }]): string =>
-                tooltipTitles.at(-dataIndex) ?? dataIndex.toString(),
+                tooltipTitles[dataIndex] ?? dataIndex.toString(),
               label: ({ dataIndex }): string =>
-                tooltipLabels.at(-dataIndex) ?? dataIndex.toString(),
+                tooltipLabels[dataIndex] ?? dataIndex.toString(),
             },
           },
         },
@@ -128,7 +128,7 @@ function getData(
 } {
   const min = new Date(year, 0, 1);
   const max = new Date(year + 1, 0, 1);
-  const data = Array.from(
+  const rawData = Array.from(
     filterArray(
       books.map(
         ({
@@ -157,10 +157,12 @@ function getData(
       )
     )
   ).sort(sortFunction(({ start }) => start, true));
+  const data = rawData.map(({ start, end }) => [start, end] as const);
+  const reversed = Array.from(rawData).reverse();
   const labels =
     count === 'books'
-      ? data.map((_, i) => (i + 1).toString()).reverse()
-      : data
+      ? reversed.map((_, i) => (i + 1).toString()).reverse()
+      : reversed
           .reduce<WritableArray<number>>((total, { pages: raw }) => {
             const pages = typeof raw === 'number' ? raw : 1;
             total.push((total.at(-1) ?? 0) + pages);
@@ -170,8 +172,8 @@ function getData(
           .reverse();
   return {
     labels,
-    data: data.map(({ start, end }) => [start, end] as const),
-    tooltipTitles: data.map(({ title }) => title),
-    tooltipLabels: data.map(({ label }) => label),
+    data,
+    tooltipTitles: rawData.map(({ title }) => title),
+    tooltipLabels: rawData.map(({ label }) => label),
   };
 }

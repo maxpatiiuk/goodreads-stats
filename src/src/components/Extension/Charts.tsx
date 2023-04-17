@@ -100,6 +100,7 @@ export function Charts({
     <div className="flex flex-col gap-8">
       <LineChart books={books} count="books" />
       <LineChart books={books} count="pages" />
+      <ReadingRate books={indexedBooks} />
       <Label.Inline>
         {commonText('year')}
         <Select
@@ -113,7 +114,6 @@ export function Charts({
           ))}
         </Select>
       </Label.Inline>
-      <ReadingRate books={indexedBooks} />
       {typeof year === 'number' && (
         <YearCharts books={indexedBooks} year={year} />
       )}

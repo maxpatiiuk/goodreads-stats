@@ -85,7 +85,7 @@ export function FilePicker({
         className={`
           flex h-44 w-full items-center justify-center text-center
           ${className.buttonPrimary}
-          ${isDragging ? 'bg-white ring ring-blue-200' : ''}
+          ${isDragging ? 'bg-white ring ring-blue-200' : 'bg-gray-200'}
           ${isFocused ? '!ring ring-blue-500' : ''}
         `}
         ref={filePickerButton}

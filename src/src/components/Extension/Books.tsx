@@ -12,7 +12,7 @@ import { commonText } from '../../localization/common';
 import { f } from '../../utils/functools';
 import type { GetSet, RA } from '../../utils/types';
 import { writable } from '../../utils/types';
-import { throttle } from '../../utils/utils';
+import { debounce } from '../../utils/utils';
 import { Button, Input, Label, Ul } from '../Atoms';
 import type { Book } from '../Foreground/readPages';
 import { dateColumns, numericColumns } from '../Foreground/readPages';
@@ -23,7 +23,7 @@ import {
   defaultVisible,
 } from './Columns';
 
-const throttleRate = 5000;
+const throttleRate = 1000;
 
 export function Books({
   books,
@@ -33,18 +33,20 @@ export function Books({
   readonly books: RA<Book>;
   readonly header: JSX.Element;
   readonly standalone: boolean;
-}): JSX.Element {
+}): JSX.Element | null {
   const [state, setState] = useStorage('primeVue');
   const throttledSet = React.useMemo(
-    () => throttle(setState, throttleRate),
+    () => debounce(setState, throttleRate),
     [setState]
   );
   const [visibleColumns = defaultVisible, setVisibleColumns] =
     useStorage('visibleColumns');
-  return (
+  return state === undefined ? null : (
     <DataTable
       className="!h-0 flex-1"
-      customRestoreState={(): object | undefined => state}
+      customRestoreState={(): object | undefined =>
+        state === false ? undefined : state
+      }
       customSaveState={throttledSet}
       dataKey="id"
       emptyMessage={commonText('noBooksFound')}
@@ -86,6 +88,7 @@ export function Books({
             filterField={config.filterField}
             header={config.header}
             key={key}
+            sortable
           />
         ) : undefined
       )}

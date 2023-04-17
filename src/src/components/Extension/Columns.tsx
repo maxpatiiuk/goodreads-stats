@@ -103,6 +103,9 @@ export const columns: RR<
     header: commonText('review'),
     defaultVisible: false,
     defaultFilter: FilterMatchMode.CONTAINS,
+    renderer: ({ userReview }) => (
+      <p dangerouslySetInnerHTML={{ __html: userReview }} />
+    ),
   },
   privateNotes: {
     header: commonText('privateNotes'),

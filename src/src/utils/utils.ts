@@ -90,11 +90,14 @@ export function mappedFind<ITEM, RETURN_TYPE>(
   return value;
 }
 
-export function debounce(callback: () => void, timeout: number): () => void {
+export function debounce<T extends RA<unknown>>(
+  callback: (...args: T) => void,
+  timeout: number
+): () => void {
   let timer: ReturnType<typeof setTimeout>;
-  return () => {
+  return (...args: T) => {
     clearTimeout(timer);
-    timer = setTimeout(callback, timeout);
+    timer = setTimeout(() => callback(...args), timeout);
   };
 }
 
