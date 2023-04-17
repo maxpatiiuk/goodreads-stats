@@ -172,10 +172,12 @@ async function fetchExtraDetails(book: BaseBook): Promise<ExtraDetails> {
     .then(async (response) => response.text())
     .then((response) =>
       JSON.parse(
-        `"${response
-          .slice(response.indexOf("'") + 1, response.lastIndexOf("'"))
-          .replaceAll("\\'", "'")
-          .replaceAll('\\$', '$')}"`
+        `"${properlyEscape(
+          response
+            .slice(response.indexOf("'") + 1, response.lastIndexOf("'"))
+            .replaceAll("\\'", "'")
+            .replaceAll('\\$', '$')
+        )}"`
       )
     )
     .then((response) => strictParseXml(response, 'text/html'));
@@ -225,9 +227,48 @@ async function fetchExtraDetails(book: BaseBook): Promise<ExtraDetails> {
       (typeof book.pageCount !== 'number' ||
         book.pageCount < maxAudioBookHours) &&
       typeof editionsUrl === 'string'
-        ? await fetchPageCount(editionsUrl, book.pageCount)
+        ? await fetchPageCount(editionsUrl, book.pageCount).catch((error) => {
+            console.error(error);
+            return book.pageCount;
+          })
         : book.pageCount,
   };
+}
+
+const escapes = {
+  b: '\b',
+  f: '\f',
+  n: '\n',
+  r: '\r',
+  t: '\t',
+};
+const invertedEscapes = Object.fromEntries(
+  Object.entries(escapes).map(([key, value]) => [value, key])
+);
+
+/**
+ * There are incorrectly escaped characters in the goodreads response. Need to
+ * normalize them before sending to JSON.parse or else it will error out
+ */
+function properlyEscape(text: string): string {
+  let isEscaped = false;
+  const result = text
+    .split('')
+    .map((character) => {
+      if (isEscaped) {
+        isEscaped = false;
+        return `\\${character}`;
+      } else if (character === '\\') {
+        isEscaped = true;
+        return '';
+      } else {
+        if (character in invertedEscapes)
+          return `\\${invertedEscapes[character]}`;
+        return character;
+      }
+    })
+    .join('');
+  return isEscaped ? `${result}\\\\` : result;
 }
 
 const maxAudioBookHours = 100;
@@ -288,3 +329,5 @@ async function fetchPageCount(
 
   return resolvedPageCount ?? rawPageCount;
 }
+
+export const exportsForTests = { properlyEscape };
