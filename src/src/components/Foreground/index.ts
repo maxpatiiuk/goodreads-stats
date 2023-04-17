@@ -21,14 +21,17 @@ downloadLink.classList.add('cursor-pointer', 'mr-[5px]');
 downloadLink.textContent = commonText('download');
 downloadLink.addEventListener('click', () => {
   const total = getTotal();
-  const { cleanup, updateProgress } = displayDialog(total);
+  const { cleanup, updateProgress, crash } = displayDialog(total);
 
   readPages(rssLink, updateProgress)
     .then(async (data) =>
       downloadFile(`${data.description}.json`, JSON.stringify(data, null, 4))
     )
     .then(cleanup)
-    .catch(console.error);
+    .catch((error) => {
+      crash(error.message);
+      console.error(error);
+    });
 });
 footer.prepend(downloadLink);
 
@@ -52,6 +55,7 @@ function getTotal(): number {
  */
 function displayDialog(total: number): {
   readonly cleanup: () => void;
+  readonly crash: (message: string) => void;
   readonly updateProgress: (progress: number) => void;
 } {
   const dialog = document.createElement('dialog');
@@ -81,5 +85,17 @@ function displayDialog(total: number): {
 
   const cleanup = (): void => dialog.remove();
 
-  return { cleanup, updateProgress };
+  function crash(message: string): void {
+    progressText.textContent = message;
+    progressText.innerHTML = `${commonText('unexpectedErrorOccurred')}<br>${
+      progressText.innerHTML
+    }`;
+    progress.remove();
+    const close = document.createElement('button');
+    close.textContent = commonText('close');
+    close.addEventListener('click', cleanup);
+    dialog.append(close);
+  }
+
+  return { cleanup, updateProgress, crash };
 }

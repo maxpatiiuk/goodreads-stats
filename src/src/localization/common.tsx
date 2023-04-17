@@ -139,4 +139,10 @@ export const commonText = createDictionary({
   collapse: {
     'en-us': 'Collapse',
   },
+  unexpectedErrorOccurred: {
+    'en-us': 'Unexpected error occurred:',
+  },
+  close: {
+    'en-us': 'Close',
+  },
 });
