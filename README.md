@@ -8,10 +8,23 @@ Features:
 - Export entire library
 - Compare reading rates between years
 - Show insights about your favorite books
+- Search your entire book library
 
 Also, check out
 my [Calendar Plus](https://chrome.google.com/webstore/detail/calendar-plus/kgbbebdcmdgkbopcffmpgkgcmcoomhmh)
 extension for Google Calendar power users.
+
+Can compare reading rate between the years
+![](./docs/img/year-by-year.jpg)
+
+Can see how long it took to read each book
+![](./docs/img/single-year.jpg)
+
+Can get an extensive breakdown and insights
+![](./docs/img/analytics.jpg)
+
+Can search and filter your entire library
+![](./docs/img/search-and-sort.jpg)
 
 ## Installation
 

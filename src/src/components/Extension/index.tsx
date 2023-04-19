@@ -8,7 +8,9 @@ import { App } from './App';
 
 /*
  * TODO: publish to webstore and post link in README.md
- * TODO: add screenshots
+ * TODO: upload Markquee promo
+ * TODO: upload youtube video
+ * TODO: add to portfolio
  */
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
