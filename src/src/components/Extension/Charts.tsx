@@ -36,7 +36,6 @@ Chart.register(
   LineElement,
   Title,
   Legend,
-  // @ts-expect-error Seems to be a typing mistake in the library
   Colors
 );
 

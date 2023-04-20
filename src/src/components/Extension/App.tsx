@@ -58,16 +58,38 @@ function Dashboard({ takeout }: { readonly takeout: Takeout }): JSX.Element {
         <DateElement date={takeout.lastBuildDate} />
       </p>
       <TabView className="contents" panelContainerClassName="contents">
-        <TabPanel className="contents" header={commonText('stats')}>
+        <TabPanel
+          className="contents"
+          header={commonText('stats')}
+          {...bugProps}
+        >
           <Charts books={takeout.books} />
         </TabPanel>
-        <TabPanel className="contents" header={commonText('allBooks')}>
+        <TabPanel
+          className="contents"
+          header={commonText('allBooks')}
+          {...bugProps}
+        >
           <Books books={takeout.books} header={header} standalone />
         </TabPanel>
-        <TabPanel className="contents" header={commonText('search')}>
+        <TabPanel
+          className="contents"
+          header={commonText('search')}
+          {...bugProps}
+        >
           <Search books={takeout.books} header={header} />
         </TabPanel>
       </TabView>
     </>
   );
 }
+
+/**
+ * There is a bug in PrimeReact's TypeScript typing that requires adding these
+ * internal attributes
+ */
+const bugProps = {
+  prevButton: undefined,
+  nextButton: undefined,
+  closeIcon: undefined,
+} as const;
