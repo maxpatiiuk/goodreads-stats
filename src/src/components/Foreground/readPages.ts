@@ -296,7 +296,7 @@ const toDate = (
 async function fetchPageCount(
   editionsUrl: string,
   rawPageCount: number | string
-): Promise<number | string> {
+): Promise<number | string | undefined> {
   const fullUrl = formatUrl(editionsUrl, {
     sort: 'num_ratings',
   });

@@ -13,7 +13,7 @@ import { commonText } from '../../localization/common';
 import { f } from '../../utils/functools';
 import type { IR, RA, RR } from '../../utils/types';
 import { filterArray, writable } from '../../utils/types';
-import { toggleItem } from '../../utils/utils';
+import { sortFunction, toggleItem } from '../../utils/utils';
 import { Button } from '../Atoms';
 import type { IndexedBook } from './Charts';
 
@@ -122,7 +122,7 @@ function computeYear(
         typeof resolvedPageCount === 'number' ? resolvedPageCount : undefined
       )
     )
-  ).sort(f.id);
+  ).sort(sortFunction(f.id));
 
   return {
     books: round(books),
