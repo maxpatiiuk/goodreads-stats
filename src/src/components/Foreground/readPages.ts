@@ -227,10 +227,16 @@ async function fetchExtraDetails(book: BaseBook): Promise<ExtraDetails> {
       (typeof book.pageCount !== 'number' ||
         book.pageCount < maxAudioBookHours) &&
       typeof editionsUrl === 'string'
-        ? await fetchPageCount(editionsUrl, book.pageCount).catch((error) => {
-            console.error(error);
-            return book.pageCount;
-          })
+        ? await fetchPageCount(editionsUrl, book.pageCount)
+            .catch((error) => {
+              console.error(error);
+              return book.pageCount;
+            })
+            .then((pageCount) =>
+              pageCount === undefined && typeof book.pageCount === 'number'
+                ? book.pageCount * pagesPerHour
+                : pageCount ?? book.pageCount
+            )
         : book.pageCount,
   };
 }
@@ -272,6 +278,12 @@ function properlyEscape(text: string): string {
 }
 
 const maxAudioBookHours = 100;
+/**
+ * An average number of pages per one hour of an audiobook. This is a wrought
+ * estimate based on several books I looked at. This is used only when Goodreads
+ * does not contain the page count for a non-audiobook edition
+ */
+const pagesPerHour = 30;
 
 const inputs = [
   'startYear',
@@ -327,7 +339,7 @@ async function fetchPageCount(
     ({ pages, isAudioBook }) => typeof pages === 'number' && !isAudioBook
   )?.pages;
 
-  return resolvedPageCount ?? rawPageCount;
+  return resolvedPageCount;
 }
 
 export const exportsForTests = { properlyEscape };
