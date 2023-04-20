@@ -2,7 +2,7 @@ import { f } from '../../utils/functools';
 import { formatUrl } from '../../utils/queryString';
 import type { RA, WritableArray } from '../../utils/types';
 import { ensure } from '../../utils/types';
-import { strictParseXml } from '../../utils/utils';
+import { group, strictParseXml } from '../../utils/utils';
 
 /*
  * FEATURE: retrieve entire timeline for a book
@@ -25,7 +25,15 @@ export async function readPages(
   return {
     description,
     lastBuildDate,
-    books: await fetchPage(xml, rssLink, progress),
+    books: await fetchPage(xml, rssLink, progress).then((books) =>
+      /**
+       * Not sure why, but RSS feed returns duplicates sometimes. This
+       * deduplicates by selecting the last occurrence
+       */
+      group(books.map((book) => [book.id, book] as const)).map(
+        ([_id, books]) => books.at(-1)!
+      )
+    ),
   };
 }
 
