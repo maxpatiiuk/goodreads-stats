@@ -26,6 +26,9 @@ Can get an extensive breakdown and insights
 Can search and filter your entire library
 ![](./docs/img/search-and-sort.jpg)
 
+Can download entire library or a single shelf
+![](./docs/img/download.jpg)
+
 ## Installation
 
 Pre-requisites:
