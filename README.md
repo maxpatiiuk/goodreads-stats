@@ -1,33 +1,39 @@
 # Goodreads Plus
 
-A browser extension for Goodreads that adds data export capability and
+[A browser extension for Goodreads](https://chrome.google.com/webstore/detail/goodreads-stats/hdpkeldenopncgodhpjdlpngmnaijpjf) that adds data export capability and
 displays extensive analytics about your reading habits.
 
-Features:
+[Add to Chrome](https://chrome.google.com/webstore/detail/goodreads-stats/hdpkeldenopncgodhpjdlpngmnaijpjf)
+
+[Video Demo](https://www.youtube.com/watch?v=f3w99Y45668)
+
+[Report a bug/feature request](https://github.com/maxxxxxdlp/goodreads-stats/issues/new/choose)
+
+Also, check out
+my [Calendar Plus](https://chrome.google.com/webstore/detail/calendar-plus/kgbbebdcmdgkbopcffmpgkgcmcoomhmh)
+extension for Google Calendar power users.
+
+## Features
 
 - Export entire library
 - Compare reading rates between years
 - Show insights about your favorite books
 - Search your entire book library
 
-Also, check out
-my [Calendar Plus](https://chrome.google.com/webstore/detail/calendar-plus/kgbbebdcmdgkbopcffmpgkgcmcoomhmh)
-extension for Google Calendar power users.
-
 Can compare reading rate between the years
-![](./docs/img/year-by-year.jpg)
+[![](./docs/img/year-by-year.jpg)](https://www.youtube.com/watch?v=f3w99Y45668)
 
 Can see how long it took to read each book
-![](./docs/img/single-year.jpg)
+[![](./docs/img/single-year.jpg)](https://www.youtube.com/watch?v=f3w99Y45668)
 
 Can get an extensive breakdown and insights
-![](./docs/img/analytics.jpg)
+[![](./docs/img/analytics.jpg)](https://www.youtube.com/watch?v=f3w99Y45668)
 
 Can search and filter your entire library
-![](./docs/img/search-and-sort.jpg)
+[![](./docs/img/search-and-sort.jpg)](https://www.youtube.com/watch?v=f3w99Y45668)
 
 Can download entire library or a single shelf
-![](./docs/img/download.jpg)
+[![](./docs/img/download.jpg)](https://www.youtube.com/watch?v=f3w99Y45668)
 
 ## Installation
 

@@ -54,8 +54,7 @@ function Dashboard({ takeout }: { readonly takeout: Takeout }): JSX.Element {
   return (
     <>
       <p>
-        {commonText('lastUpdated')}
-        <DateElement date={takeout.lastBuildDate} />
+        {commonText('lastUpdated')} <DateElement date={takeout.lastBuildDate} />
       </p>
       <TabView className="contents" panelContainerClassName="contents">
         <TabPanel
