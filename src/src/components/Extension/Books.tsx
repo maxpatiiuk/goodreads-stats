@@ -12,7 +12,7 @@ import { commonText } from '../../localization/common';
 import { f } from '../../utils/functools';
 import type { GetSet, RA } from '../../utils/types';
 import { writable } from '../../utils/types';
-import { debounce } from '../../utils/utils';
+import { debounce, multiSortFunction } from '../../utils/utils';
 import { Button, Input, Label, Ul } from '../Atoms';
 import type { Book } from '../Foreground/readPages';
 import { dateColumns, numericColumns } from '../Foreground/readPages';
@@ -58,6 +58,7 @@ export function Books({
           <span className="-ml-2 flex-1" />
           <VisibleColumns
             visibleColumns={[visibleColumns, setVisibleColumns]}
+            tableState={state}
           />
         </div>
       }
@@ -96,12 +97,38 @@ export function Books({
   );
 }
 
+const allColumns = Object.keys(columns);
+
+// FIXME: take a look at 2 bugs (screenshots)
 function VisibleColumns({
   visibleColumns: [visibleColumns, setVisibleColumns],
+  tableState: state,
 }: {
+  readonly tableState: object | false;
   readonly visibleColumns: GetSet<RA<keyof Book>>;
 }): JSX.Element {
   const overlayRef = React.useRef<OverlayPanel | null>(null);
+  const rawColumnOrder =
+    typeof state === 'object' &&
+    'columnOrder' in state &&
+    Array.isArray(state.columnOrder)
+      ? state.columnOrder
+      : undefined;
+  const columnOrder = React.useMemo<RA<keyof Book>>(
+    () =>
+      rawColumnOrder === undefined
+        ? allColumns
+        : Array.from(Object.keys(columns)).sort(
+            multiSortFunction(
+              (column) => {
+                const index = rawColumnOrder.indexOf(column);
+                return index === -1 ? rawColumnOrder.length : index;
+              },
+              (column) => allColumns.indexOf(column)
+            )
+          ),
+    [rawColumnOrder]
+  );
   return (
     <>
       <Button.Primary
@@ -111,8 +138,8 @@ function VisibleColumns({
       </Button.Primary>
       <OverlayPanel ref={overlayRef}>
         <Ul>
-          {Object.entries(columns).map(([header, config]) =>
-            config === undefined ? undefined : (
+          {columnOrder.map((header) =>
+            columns[header] === undefined ? undefined : (
               <Label.Inline key={header}>
                 <Input.Checkbox
                   checked={f.includes(visibleColumns, header)}
@@ -124,7 +151,7 @@ function VisibleColumns({
                     )
                   }
                 />
-                {config.header}
+                {columns[header]?.header}
               </Label.Inline>
             )
           )}

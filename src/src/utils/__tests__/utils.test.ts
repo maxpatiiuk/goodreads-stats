@@ -3,6 +3,7 @@ import {
   capitalize,
   group,
   mappedFind,
+  multiSortFunction,
   replaceItem,
   sortFunction,
   toggleItem,
@@ -46,6 +47,28 @@ describe('sortFunction', () => {
       )
     ).toEqual([10, 1, 9, 2, 8, 3, 7, 4, 6, 5]);
   });
+});
+
+test('multiSortFunction', () => {
+  expect(
+    [
+      { type: 'c', priority: 3 },
+      { type: 'd', priority: 4 },
+      { type: 'd', priority: 3 },
+      { type: 'c', priority: 4 },
+    ].sort(
+      multiSortFunction(
+        ({ type }) => type,
+        ({ priority }) => priority,
+        true
+      )
+    )
+  ).toEqual([
+    { type: 'c', priority: 4 },
+    { type: 'c', priority: 3 },
+    { type: 'd', priority: 4 },
+    { type: 'd', priority: 3 },
+  ]);
 });
 
 theories(toggleItem, {
