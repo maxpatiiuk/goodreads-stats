@@ -1,12 +1,12 @@
 import { InputText } from 'primereact/inputtext';
 import React from 'react';
+import { stem } from 'porterstem';
 
 import type { IR, R, RA, RR } from '../../utils/types';
 import { ensure, filterArray } from '../../utils/types';
 import { count, group, sortFunction, sum } from '../../utils/utils';
 import type { Book } from '../Foreground/readPages';
 import { Books } from './Books';
-import { stem } from './stemmer';
 
 export function Search({
   books: allBooks,
