@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maxxxxxdlp/calendar-stats.git"
+    "url": "https://github.com/maxpatiiuk/calendar-stats.git"
   },
   "author": "EECS 581 Team 19",
-  "homepage": "https://github.com/maxxxxxdlp/calendar-stats#readme",
+  "homepage": "https://github.com/maxpatiiuk/calendar-stats#readme",
   "bugs": {
-    "url": "https://github.com/maxxxxxdlp/calendar-stats/issues"
+    "url": "https://github.com/maxpatiiuk/calendar-stats/issues"
   },
   "scripts": {
     "build": "npx webpack --mode production",

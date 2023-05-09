@@ -7,7 +7,7 @@ displays extensive analytics about your reading habits.
 
 [Video Demo](https://www.youtube.com/watch?v=f3w99Y45668)
 
-[Report a bug/feature request](https://github.com/maxxxxxdlp/goodreads-stats/issues/new/choose)
+[Report a bug/feature request](https://github.com/maxpatiiuk/goodreads-stats/issues/new/choose)
 
 Also, check out
 my [Calendar Plus](https://chrome.google.com/webstore/detail/calendar-plus/kgbbebdcmdgkbopcffmpgkgcmcoomhmh)
