@@ -1,7 +1,7 @@
 {
   "name": "Goodreads Stats",
   "short_name": "Goodreads Stats",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Goodreads extension that adds data export capability and displays extensive analytics about your reading habits.",
   "author": "Max Patiiuk",
   "manifest_version": 3,

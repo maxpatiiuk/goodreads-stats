@@ -1,6 +1,6 @@
 {
   "name": "goodreads-plus",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "description": "Goodreads extension that adds data export capability and displays extensive analytics about your reading habits.",
   "license": "MIT",
